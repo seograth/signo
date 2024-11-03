@@ -1,0 +1,13 @@
+.notFound-container {
+  width: 100%;
+  height: calc(100vh - 65px - 41px);
+  display: flex;
+}
+
+@media only screen and (max-width: 959px) {
+  .notFound-container {
+    width: 100%;
+    height: calc(100vh - 65px - 104px);
+    display: flex;
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "translation": {
+    "home": {
+      "title": "SigniFi",
+      "subtitle": "Connect Beyond Words",
+      "entryText": "A structured, leveled learning pathway that guides users from beginner to advanced sign language proficiency.",
+      "startNow": "Start now!"
+    },
+    "learn": {
+      "handSelection": {
+        "title": "Select the hand that works better for you",
+        "left": "Left Hand",
+        "right": "Right Hand"
+      }
+    },
+    "aboutUs": {
+      "title": "About us"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "subtitle": "Unfortunately an error has occurred. The requested page was not found."
+    }
+  }
+}
