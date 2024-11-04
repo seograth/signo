@@ -87,6 +87,34 @@ function Learn() {
           >
             <Typography variant='h4'>Learning is starting...</Typography>
           </Grid>
+          <Grid size={{ xs: 6 }}>
+            <Box
+              sx={{
+                border: '1px solid #fff',
+                padding: '1rem',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '80vh',
+              }}
+            >
+              <Typography variant='body1'>Static</Typography>
+            </Box>
+          </Grid>
+          <Grid size={{ xs: 6 }}>
+            <Box
+              sx={{
+                border: '1px solid #fff',
+                padding: '1rem',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                minHeight: '80vh',
+              }}
+            >
+              <Typography variant='body1'>Dynamic</Typography>
+            </Box>
+          </Grid>
         </Grid>
       </Container>
     </Box>
