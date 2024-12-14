@@ -1,4 +1,4 @@
-import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
+import { FilesetResolver, HandLandmarker, NormalizedLandmark } from '@mediapipe/tasks-vision'
 
 import { Box, Button, Container, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
@@ -6,6 +6,33 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Webcam from 'react-webcam'
 import greekAlphabet from '../../utils/greekAlphabet'
+
+function drawConnectors(
+  ctx: CanvasRenderingContext2D,
+  handLandmarks: any,
+  connections: number[][],
+  style: { color: string; lineWidth: number },
+) {
+  ctx.strokeStyle = style.color
+  ctx.lineWidth = style.lineWidth
+  connections.forEach(([start, end]) => {
+    const startPt = handLandmarks[start]
+    const endPt = handLandmarks[end]
+    ctx.beginPath()
+    ctx.moveTo(startPt.x * ctx.canvas.width, startPt.y * ctx.canvas.height)
+    ctx.lineTo(endPt.x * ctx.canvas.width, endPt.y * ctx.canvas.height)
+    ctx.stroke()
+  })
+}
+
+function drawLandmarks(ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandmark[]) {
+  ctx.fillStyle = '#FF0000'
+  handLandmarks.forEach(({ x, y }) => {
+    ctx.beginPath()
+    ctx.arc(x * ctx.canvas.width, y * ctx.canvas.height, 5, 0, 2 * Math.PI)
+    ctx.fill()
+  })
+}
 
 function Learn() {
   const [selectedHand, setSelectedHand] = useState<string>('')
@@ -18,6 +45,7 @@ function Learn() {
 
   // https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker/web_js#video
   // npm i @mediapipe/drawing_utils CHECK FOR BETTER DRAWING
+  // const landmarkerRef = useRef<HandLandmarker | null>(null)
 
   useEffect(() => {
     const initializeLandmarker = async () => {
@@ -27,13 +55,13 @@ function Learn() {
         )
         const handLandmarker = await HandLandmarker.createFromOptions(visionFileset, {
           baseOptions: {
-            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+            modelAssetPath: ` https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
             delegate: 'GPU',
           },
-
           runningMode: 'IMAGE',
           numHands: 2,
         })
+        // landmarkerRef.current = handLandmarker
         setLandmarker(handLandmarker)
       } catch (error) {
         console.error('Error initializing HandLandmarker:', error)
@@ -43,6 +71,10 @@ function Learn() {
     initializeLandmarker()
 
     return () => {
+      // if (landmarkerRef.current) {
+      //   landmarkerRef.current.close()
+      //   landmarkerRef.current = null
+      // }
       if (landmarker) {
         landmarker.close()
       }
@@ -97,25 +129,52 @@ function Learn() {
   // }, [landmarker, currentLetter])
 
   const captureFrame = async () => {
-    if (webcamRef.current && canvasRef.current && landmarker) {
-      const video = webcamRef.current.video!
-      const canvas = canvasRef.current
-      const ctx = canvas.getContext('2d')!
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
+    if (!webcamRef.current || !canvasRef.current || !landmarker) {
+      return // Early return if anything is missing (no webcam, canvas, or landmarker)
+    }
 
+    const video = webcamRef.current.video
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d') // ctx could be null
+
+    // Ensure video element and context are available
+    if (!video || !ctx) {
+      console.error('Video element or canvas context is not available')
+      return
+    }
+
+    // Ensure the video has valid dimensions
+    if (video.videoWidth <= 0 || video.videoHeight <= 0) {
+      console.error('Invalid video dimensions:', {
+        width: video.videoWidth,
+        height: video.videoHeight,
+      })
+      return
+    }
+
+    // Set canvas size to match video dimensions
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+
+    try {
+      // Detect hand landmarks
       const results = await landmarker.detect(video)
 
-      if (results.landmarks.length > 0) {
-        drawLandmarks(canvas, results.landmarks)
+      if (results.landmarks && results.landmarks.length > 0) {
+        // Draw detected landmarks if present
+        drawDetectedLandmarks(canvas, results.landmarks)
 
+        // Check if landmarks are correct and update the current letter
         if (areLandmarksCorrect(results.landmarks, currentLetter)) {
           const nextIndex = (greekAlphabet.indexOf(currentLetter) + 1) % greekAlphabet.length
           setCurrentLetter(greekAlphabet[nextIndex])
         }
       } else {
-        ctx.clearRect(0, 0, canvas.width, canvas.height) // Clear canvas if no hands detected
+        // Clear canvas if no hands detected
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
       }
+    } catch (error) {
+      console.error('Error detecting landmarks:', error)
     }
   }
 
@@ -128,34 +187,46 @@ function Learn() {
     return Math.random() > 0.95 // Mock condition for testing
   }
 
-  const drawLandmarks = (canvas: HTMLCanvasElement, landmarks: any) => {
+  const drawDetectedLandmarks = (canvas: HTMLCanvasElement, landmarks: any) => {
     const ctx = canvas.getContext('2d')!
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-    ctx.strokeStyle = 'red'
-    ctx.lineWidth = 2
+    const video = webcamRef.current?.video!
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-    landmarks.forEach((hand: any) => {
-      hand.forEach((point: { x: number; y: number }) => {
-        const x = point.x * canvas.width
-        const y = point.y * canvas.height
+    landmarks.forEach((handLandmarks: any) => {
+      // Draw connections between landmarks
+      drawConnectors(
+        ctx,
+        handLandmarks,
+        [
+          [0, 1],
+          [1, 2],
+          [2, 3],
+          [3, 4], // Thumb
+          [5, 6],
+          [6, 7],
+          [7, 8], // Index finger
+          [9, 10],
+          [10, 11],
+          [11, 12], // Middle finger
+          [13, 14],
+          [14, 15],
+          [15, 16], // Ring finger
+          [17, 18],
+          [18, 19],
+          [19, 20], // Pinky finger
+          [0, 5],
+          [5, 9],
+          [9, 13],
+          [13, 17],
+          [0, 17], // Palm connections
+        ],
+        { color: '#00FF00', lineWidth: 2 },
+      )
 
-        ctx.beginPath()
-        ctx.arc(x, y, 5, 0, 2 * Math.PI)
-        ctx.fill()
-      })
-
-      for (let i = 0; i < hand.length - 1; i++) {
-        const startX = hand[i].x * canvas.width
-        const startY = hand[i].y * canvas.height
-        const endX = hand[i + 1].x * canvas.width
-        const endY = hand[i + 1].y * canvas.height
-
-        ctx.beginPath()
-        ctx.moveTo(startX, startY)
-        ctx.lineTo(endX, endY)
-        ctx.stroke()
-      }
+      // Draw individual landmarks
+      drawLandmarks(ctx, handLandmarks)
     })
   }
 
