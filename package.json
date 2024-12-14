@@ -28,6 +28,8 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@mediapipe/drawing_utils": "^0.3.1675466124",
+    "@mediapipe/tasks-vision": "^0.10.20",
     "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.1.6",
     "@mui/x-data-grid": "^7.22.0",
@@ -41,11 +43,13 @@
     "i18next-browser-languagedetector": "^8.0.0",
     "i18next-http-backend": "^2.6.2",
     "i18next-scanner": "^4.6.0",
+    "opencv.js": "^1.2.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^15.1.0",
     "react-loading": "^2.0.3",
-    "react-router-dom": "^6.27.0"
+    "react-router-dom": "^6.27.0",
+    "react-webcam": "^7.2.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
