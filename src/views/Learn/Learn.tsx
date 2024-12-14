@@ -1,4 +1,5 @@
 import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
+
 import { Box, Button, Container, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { useEffect, useRef, useState } from 'react'
@@ -16,6 +17,7 @@ function Learn() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   // https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker/web_js#video
+  // npm i @mediapipe/drawing_utils CHECK FOR BETTER DRAWING
 
   useEffect(() => {
     const initializeLandmarker = async () => {
@@ -26,6 +28,7 @@ function Learn() {
         const handLandmarker = await HandLandmarker.createFromOptions(visionFileset, {
           baseOptions: {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+            delegate: 'GPU',
           },
 
           runningMode: 'IMAGE',
