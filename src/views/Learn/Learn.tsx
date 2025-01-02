@@ -56,7 +56,7 @@ function Learn() {
         const handLandmarker = await HandLandmarker.createFromOptions(visionFileset, {
           baseOptions: {
             modelAssetPath: ` https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
-            delegate: 'GPU',
+            delegate: 'CPU',
           },
           runningMode: 'IMAGE',
           numHands: 2,
@@ -194,6 +194,9 @@ function Learn() {
     const video = webcamRef.current?.video!
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)' // Black with 60% opacity
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
     landmarks.forEach((handLandmarks: any) => {
       // Draw connections between landmarks
       drawConnectors(
@@ -222,7 +225,7 @@ function Learn() {
           [13, 17],
           [0, 17], // Palm connections
         ],
-        { color: '#00FF00', lineWidth: 2 },
+        { color: '#ffed4d', lineWidth: 2 },
       )
 
       // Draw individual landmarks
@@ -298,83 +301,147 @@ function Learn() {
     )
   }
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: 1 }}>
-      <Container maxWidth='lg' sx={{ mt: '3rem' }}>
-        <Grid container sx={{ display: 'flex', width: 1, height: 1 }} spacing={2}>
-          <Grid
-            size={{ xs: 12 }}
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100vw',
+        height: '100vh',
+        overflow: 'hidden', // Prevent scrolling
+      }}
+    >
+      {/* Conditional Layout Based on Selected Hand */}
+      {selectedHand === 'left' ? (
+        <>
+          {/* Webcam and Canvas on the Left */}
+          <Box
             sx={{
+              width: '50%',
+              height: '100%',
               display: 'flex',
               justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            <Typography variant='h4'>Learning is starting...</Typography>
-          </Grid>
-          <Grid size={{ xs: 6 }}>
             <Box
               sx={{
-                border: '1px solid #fff',
-                padding: '1rem',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '80vh',
+                position: 'relative',
+                width: '100%',
+                height: '100%',
               }}
             >
-              <Typography variant='body1'>{currentLetter}</Typography>
-            </Box>
-          </Grid>
-          <Grid size={{ xs: 6 }} sx={{ display: 'flex' }}>
-            <Box
-              sx={{
-                border: '1px solid #fff',
-                padding: '1rem',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '80vh',
-                width: 1,
-              }}
-            >
-              <Box
-                sx={{
-                  position: 'relative', // Ensure that the parent container positions children correctly
+              {/* Webcam Feed */}
+              <Webcam
+                ref={webcamRef}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
                   width: '100%',
-                  height: 0, // Height will be controlled via padding
-                  paddingTop: '75%', // This ensures a 4:3 aspect ratio (3/4 * 100 = 75%)
+                  height: '100%',
+                  transform: 'rotateY(180deg)',
+                  objectFit: 'contain', // Ensures webcam fills container
+                  zIndex: 1, // Below the canvas
                 }}
-              >
-                <Webcam
-                  ref={webcamRef}
-                  style={{
-                    position: 'absolute', // Position webcam over the container
-                    top: 0,
-                    left: 0,
-                    width: '100%', // Full width of container
-                    height: '100%', // Maintain aspect ratio
-                    transform: 'rotateY(180deg)', // Flip webcam horizontally
-                    objectFit: 'contain', // Ensures webcam covers the area without stretching
-                  }}
-                />
-                <canvas
-                  ref={canvasRef}
-                  style={{
-                    position: 'absolute', // Position canvas over the webcam
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%', // Keep canvas size matching webcam
-                    zIndex: 1, // Ensure canvas is on top of the webcam
-                    pointerEvents: 'none', // Prevent canvas from blocking interaction with webcam
-                    transform: 'rotateY(180deg)', // Flip canvas horizontally to match webcam
-                    objectFit: 'cover', // Ensures canvas covers the area without stretching
-                  }}
-                />
-              </Box>
+              />
+
+              {/* MediaPipe Hands Canvas */}
+              <canvas
+                ref={canvasRef}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  zIndex: 2, // Above webcam feed
+                  pointerEvents: 'none', // Disable interaction with canvas
+                  transform: 'rotateY(180deg)', // Flip canvas horizontally to match webcam
+                  objectFit: 'cover', // Ensures canvas covers the area without stretching
+                }}
+              />
             </Box>
-          </Grid>
-        </Grid>
-      </Container>
+          </Box>
+
+          {/* Greek Letter on the Right */}
+          <Box
+            sx={{
+              width: '50%',
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Typography variant='h1'>{currentLetter}</Typography>
+          </Box>
+        </>
+      ) : (
+        <>
+          {/* Greek Letter on the Left */}
+          <Box
+            sx={{
+              width: '50%',
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Typography variant='h1'>{currentLetter}</Typography>
+          </Box>
+
+          {/* Webcam and Canvas on the Right */}
+          <Box
+            sx={{
+              width: '50%',
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Box
+              sx={{
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+              }}
+            >
+              {/* Webcam Feed */}
+              <Webcam
+                ref={webcamRef}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  transform: 'rotateY(180deg)',
+                  objectFit: 'contain', // Ensures webcam fills container
+                  zIndex: 1, // Below the canvas
+                }}
+              />
+
+              {/* MediaPipe Hands Canvas */}
+              <canvas
+                ref={canvasRef}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  zIndex: 2, // Above webcam feed
+                  pointerEvents: 'none', // Disable interaction with canvas
+                  transform: 'rotateY(180deg)', // Flip canvas horizontally to match webcam
+                  objectFit: 'cover', // Ensures canvas covers the area without stretching
+                }}
+              />
+            </Box>
+          </Box>
+        </>
+      )}
     </Box>
   )
 }
