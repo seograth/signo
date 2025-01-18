@@ -10,9 +10,9 @@ hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.7
 mp_draw = mp.solutions.drawing_utils
 
 # Dataset directory and output file
-dataset_dir = "data/raw/"
+dataset_dir = "./modelisimo/data/raw/"
 os.makedirs(dataset_dir, exist_ok=True)
-output_file = "data/processed/gsl_dataset.csv"
+output_file = "./modelisimo/data/processed/gsl_dataset.csv"
 
 # Function to collect data
 def collect_data(label, num_samples=100):

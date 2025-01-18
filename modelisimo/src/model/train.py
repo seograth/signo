@@ -26,7 +26,7 @@ def plot_training_history(history):
     plt.tight_layout()
     plt.show()
 
-def train_model(model, X_train, y_train, X_val, y_val, epochs=50, batch_size=32):
+def train_model(model, X_train, y_train, X_val, y_val, epochs=30, batch_size=8):
     history = model.fit(X_train, y_train, 
                         validation_data=(X_val, y_val), 
                         epochs=epochs, 

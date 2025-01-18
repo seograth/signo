@@ -37,3 +37,9 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+
+#model
+modelisimo/src/data/__pychache__/*
+modelisimo/src/evaluation/__pychache__/*
+modelisimo/src/model/__pychache__/*

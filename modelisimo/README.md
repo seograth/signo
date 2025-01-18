@@ -13,6 +13,7 @@
         data/ for dataset loading and preprocessing:
             dataset_loader.py: Loads the dataset from a CSV file.
             preprocess.py: Handles normalization, splitting, and label encoding.
+            create_dataset.py: Creates a csv dataset of hand landmarks.
         model/ for model creation and training:
             model.py: Defines the neural network architecture.
             train.py: Contains the training loop.

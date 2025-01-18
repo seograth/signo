@@ -1,14 +1,15 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-from tensorflow.keras.models import load_model
+import tensorflow as tf
+import joblib
 
 def live_prediction(model_path, label_encoder):
     """
     Real-time prediction using the trained model and MediaPipe Hands.
     """
     # Load the trained model
-    model = load_model(model_path)
+    model = tf.keras.models.load_model(model_path)
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(min_detection_confidence=0.7, min_tracking_confidence=0.7)
     mp_draw = mp.solutions.drawing_utils
@@ -55,10 +56,12 @@ def live_prediction(model_path, label_encoder):
 # Example usage
 if __name__ == "__main__":
     from sklearn.preprocessing import LabelEncoder
-    import joblib
+    encoder = LabelEncoder()
+    encoder.fit(["1", "2", "3", "4"])
 
     # Load the label encoder
-    label_encoder = joblib.load("models/label_encoder.pkl")  # Ensure you save the label encoder during preprocessing
-    model_path = "models/gsl_hand_model.h5"
+    joblib.dump(encoder, "./modelisimo/models/label_encoder_classes.npy")
+    # label_encoder = joblib.load("./modelisimo/models/label_encoder_classes.npy")  # Ensure you save the label encoder during preprocessing
+    model_path = "./modelisimo/models/gsl_hand_model.h5"
 
-    live_prediction(model_path, label_encoder)
+    live_prediction(model_path, encoder)
