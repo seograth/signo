@@ -55,13 +55,10 @@ def live_prediction(model_path, label_encoder):
 
 # Example usage
 if __name__ == "__main__":
-    from sklearn.preprocessing import LabelEncoder
-    encoder = LabelEncoder()
-    encoder.fit(["1", "2", "3", "4"])
-
+   
     # Load the label encoder
-    joblib.dump(encoder, "./modelisimo/models/label_encoder_classes.npy")
     # label_encoder = joblib.load("./modelisimo/models/label_encoder_classes.npy")  # Ensure you save the label encoder during preprocessing
+    label_encoder = joblib.load("./modelisimo/models/labels_encoder_classes.pkl")
     model_path = "./modelisimo/models/gsl_hand_model.h5"
 
-    live_prediction(model_path, encoder)
+    live_prediction(model_path, label_encoder)
