@@ -1,11 +1,12 @@
 import { FilesetResolver, HandLandmarker, NormalizedLandmark } from '@mediapipe/tasks-vision'
-
+import { HAND_CONNECTIONS } from '@mediapipe/hands'
 import { Box, Button, Container, Typography } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Webcam from 'react-webcam'
 import greekAlphabet from '../../utils/greekAlphabet'
+import * as ort from 'onnxruntime-web'
 
 function drawConnectors(
   ctx: CanvasRenderingContext2D,
@@ -25,16 +26,22 @@ function drawConnectors(
   })
 }
 
-function drawLandmarks(ctx: CanvasRenderingContext2D, handLandmarks: NormalizedLandmark[]) {
-  ctx.fillStyle = '#FF0000'
-  handLandmarks.forEach(({ x, y }) => {
-    ctx.beginPath()
-    ctx.arc(x * ctx.canvas.width, y * ctx.canvas.height, 5, 0, 2 * Math.PI)
-    ctx.fill()
-  })
+function preprocessLandmarks(landmarks: NormalizedLandmark[]): number[] {
+  return landmarks.flatMap(landmark => [landmark.x, landmark.y, landmark.z]);
+}
+
+async function predictHandSign(session: ort.InferenceSession, landmarks: NormalizedLandmark[]) {
+  const preprocessedLandmarks = preprocessLandmarks(landmarks);
+  const inputTensor = new ort.Tensor('float32', new Float32Array(preprocessedLandmarks), [1, preprocessedLandmarks.length]);
+  const feeds = { input: inputTensor };
+  const results = await session.run(feeds);
+  const output = results.output.data as Float32Array;
+  const predictedClass = Array.from(output).indexOf(Math.max(...output));
+  return predictedClass;
 }
 
 function Learn() {
+  const [session, setSession] = useState<ort.InferenceSession | null>(null);
   const [selectedHand, setSelectedHand] = useState<string>('')
   const [currentLetter, setCurrentLetter] = useState<string>(greekAlphabet[0])
   const { t } = useTranslation()
@@ -42,10 +49,6 @@ function Learn() {
 
   const webcamRef = useRef<Webcam>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  // https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker/web_js#video
-  // npm i @mediapipe/drawing_utils CHECK FOR BETTER DRAWING
-  // const landmarkerRef = useRef<HandLandmarker | null>(null)
 
   useEffect(() => {
     const initializeLandmarker = async () => {
@@ -61,7 +64,6 @@ function Learn() {
           runningMode: 'IMAGE',
           numHands: 2,
         })
-        // landmarkerRef.current = handLandmarker
         setLandmarker(handLandmarker)
       } catch (error) {
         console.error('Error initializing HandLandmarker:', error)
@@ -71,62 +73,26 @@ function Learn() {
     initializeLandmarker()
 
     return () => {
-      // if (landmarkerRef.current) {
-      //   landmarkerRef.current.close()
-      //   landmarkerRef.current = null
-      // }
       if (landmarker) {
         landmarker.close()
       }
     }
   }, [])
 
-  // FOR VIDEO
-  // const captureFrame = async () => {
-  //   if (webcamRef.current && landmarker) {
-  //     const video = webcamRef.current.video!
-  //     const canvas = canvasRef.current!
+  useEffect(() => {
+    const loadModel = async () => {
+      try {
+        console.log("Attempting to load the ONNX model");
+        ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';
+        const session = await ort.InferenceSession.create('../../../model_json/sign_model.onnx');
+        setSession(session);
+      } catch (error) {
+        console.error('Error loading ONNX model:', error);
+      }
+    };
 
-  //     const results = await landmarker.detectForVideo(video, performance.now()) // Use detectForVideo
-  //     if (results.landmarks.length > 0 && areLandmarksCorrect(results.landmarks, currentLetter)) {
-  //       const nextIndex = (greekAlphabet.indexOf(currentLetter) + 1) % greekAlphabet.length
-  //       setCurrentLetter(greekAlphabet[nextIndex])
-  //     }
-
-  //     drawLandmarks(canvas, results.landmarks)
-  //   }
-  // }
-
-  // const areLandmarksCorrect = (landmarks: any, letter: string): boolean => {
-  //   // Replace with actual logic
-  //   return Math.random() > 0.95
-  // }
-
-  // const drawLandmarks = (canvas: HTMLCanvasElement | null, landmarks: any) => {
-  //   if (!canvas || !landmarks) return
-  //   const ctx = canvas.getContext('2d')!
-  //   const video = webcamRef.current?.video!
-  //   const { videoWidth, videoHeight } = video
-
-  //   canvas.width = videoWidth
-  //   canvas.height = videoHeight
-
-  //   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  //   ctx.drawImage(video, 0, 0, videoWidth, videoHeight)
-  //   ctx.fillStyle = 'red'
-  //   landmarks.forEach((hand: any) => {
-  //     hand.forEach((point: { x: number; y: number }) => {
-  //       ctx.beginPath()
-  //       ctx.arc(point.x * videoWidth, point.y * videoHeight, 5, 0, 2 * Math.PI)
-  //       ctx.fill()
-  //     })
-  //   })
-  // }
-
-  // useEffect(() => {
-  //   const interval = setInterval(captureFrame, 100)
-  //   return () => clearInterval(interval)
-  // }, [landmarker, currentLetter])
+    loadModel();
+  }, []);
 
   const captureFrame = async () => {
     if (!webcamRef.current || !canvasRef.current || !landmarker) {
@@ -160,14 +126,13 @@ function Learn() {
       // Detect hand landmarks
       const results = await landmarker.detect(video)
 
-      if (results.landmarks && results.landmarks.length > 0) {
-        // Draw detected landmarks if present
-        drawDetectedLandmarks(canvas, results.landmarks)
+      if (results?.landmarks && results.landmarks.length > 0) {
+        drawConnectors(ctx, results.landmarks[0], HAND_CONNECTIONS, { color: 'red', lineWidth: 2 });
 
         // Check if landmarks are correct and update the current letter
-        if (areLandmarksCorrect(results.landmarks, currentLetter)) {
-          const nextIndex = (greekAlphabet.indexOf(currentLetter) + 1) % greekAlphabet.length
-          setCurrentLetter(greekAlphabet[nextIndex])
+        if (await areLandmarksCorrect(results.landmarks[0], currentLetter)) {
+          const nextIndex = (greekAlphabet.indexOf(currentLetter) + 1) % greekAlphabet.length;
+          setCurrentLetter(greekAlphabet[nextIndex]);
         }
       } else {
         // Clear canvas if no hands detected
@@ -183,55 +148,17 @@ function Learn() {
     return () => clearInterval(interval)
   }, [landmarker, currentLetter])
 
-  const areLandmarksCorrect = (landmarks: any, letter: string): boolean => {
-    return Math.random() > 0.95 // Mock condition for testing
-  }
+  const areLandmarksCorrect = async (landmarks: NormalizedLandmark[], letter: string): Promise<boolean> => {
+    if (!session) {
+      console.error('ONNX model session is not loaded');
+      return false;
+    }
 
-  const drawDetectedLandmarks = (canvas: HTMLCanvasElement, landmarks: any) => {
-    const ctx = canvas.getContext('2d')!
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    const video = webcamRef.current?.video!
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)' // Black with 60% opacity
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-    landmarks.forEach((handLandmarks: any) => {
-      // Draw connections between landmarks
-      drawConnectors(
-        ctx,
-        handLandmarks,
-        [
-          [0, 1],
-          [1, 2],
-          [2, 3],
-          [3, 4], // Thumb
-          [5, 6],
-          [6, 7],
-          [7, 8], // Index finger
-          [9, 10],
-          [10, 11],
-          [11, 12], // Middle finger
-          [13, 14],
-          [14, 15],
-          [15, 16], // Ring finger
-          [17, 18],
-          [18, 19],
-          [19, 20], // Pinky finger
-          [0, 5],
-          [5, 9],
-          [9, 13],
-          [13, 17],
-          [0, 17], // Palm connections
-        ],
-        { color: '#ffed4d', lineWidth: 2 },
-      )
-
-      // Draw individual landmarks
-      drawLandmarks(ctx, handLandmarks)
-    })
-  }
+    const predictedClass = await predictHandSign(session, landmarks);
+    const predictedLetter = greekAlphabet[predictedClass];
+    console.log('Predicted Letter:', predictedLetter);
+    return predictedLetter === letter;
+  };
 
   if (selectedHand.length === 0) {
     return (
