@@ -88,6 +88,13 @@ export const CameraView: React.FC<CameraViewProps> = ({
       interval = setInterval(() => {
         setHoldProgress((prev) => {
           if (prev >= 100) {
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+              try {
+                navigator.vibrate([40, 30, 40])
+              } catch {
+                // Vibration API unsupported or disallowed, fallback silently
+              }
+            }
             audioEngine.playSuccessChime()
             gslClassifier.resetHistory()
             setIsCoolingDown(true)
@@ -218,7 +225,9 @@ export const CameraView: React.FC<CameraViewProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Process Video Frame Loop
+  const isProcessingRef = useRef<boolean>(false)
+
+  // Process Video Frame Loop with Processing Lock Guard
   useEffect(() => {
     let isActive = true
 
@@ -227,20 +236,21 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
       const video = videoRef.current
       const canvas = canvasRef.current
-      if (video && canvas && video.readyState >= 2 && cameraActive) {
-        canvas.width = video.videoWidth || 640
-        canvas.height = video.videoHeight || 480
+      if (video && canvas && video.readyState >= 2 && cameraActive && !isProcessingRef.current) {
+        if (canvas.width !== (video.videoWidth || 640) || canvas.height !== (video.videoHeight || 480)) {
+          canvas.width = video.videoWidth || 640
+          canvas.height = video.videoHeight || 480
+        }
         const ctx = canvas.getContext('2d')
 
-        if (ctx) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-          if (handsWorkerRef.current) {
-            try {
-              await handsWorkerRef.current.send({ image: video })
-            } catch {
-              // Frame dropped, continue
-            }
+        if (ctx && handsWorkerRef.current) {
+          isProcessingRef.current = true
+          try {
+            await handsWorkerRef.current.send({ image: video })
+          } catch {
+            // Frame dropped, continue
+          } finally {
+            isProcessingRef.current = false
           }
         }
       }
