@@ -51,6 +51,16 @@ export const Learn: React.FC = () => {
 
   // Alphabet Mode State
   const [alphabetIndex, setAlphabetIndex] = useState<number>(0)
+  const alphabetScrollRef = React.useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (mode === 'alphabet') {
+      const activeBtn = document.getElementById(`alphabet-btn-${alphabetIndex}`)
+      if (activeBtn) {
+        activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+      }
+    }
+  }, [alphabetIndex, mode])
 
   // Speed Rush State
   const [speedTimer, setSpeedTimer] = useState<number>(60)
@@ -269,6 +279,12 @@ export const Learn: React.FC = () => {
             </IconButton>
 
             <Box
+              ref={alphabetScrollRef}
+              onWheel={(e) => {
+                if (alphabetScrollRef.current) {
+                  alphabetScrollRef.current.scrollLeft += e.deltaY
+                }
+              }}
               sx={{
                 display: 'flex',
                 gap: 0.5,
@@ -276,6 +292,9 @@ export const Learn: React.FC = () => {
                 flex: 1,
                 minWidth: 0,
                 py: 0.2,
+                scrollBehavior: 'smooth',
+                touchAction: 'pan-x',
+                WebkitOverflowScrolling: 'touch',
                 scrollbarWidth: 'none',
                 '&::-webkit-scrollbar': { display: 'none' },
               }}
@@ -283,6 +302,7 @@ export const Learn: React.FC = () => {
               {GSL_ALPHABET.map((item, idx) => (
                 <Button
                   key={item.letter}
+                  id={`alphabet-btn-${idx}`}
                   variant={idx === alphabetIndex ? 'contained' : 'text'}
                   color={idx === alphabetIndex ? 'primary' : 'inherit'}
                   size='small'
@@ -291,7 +311,8 @@ export const Learn: React.FC = () => {
                     setAlphabetIndex(idx)
                   }}
                   sx={{
-                    minWidth: 32,
+                    flexShrink: 0,
+                    minWidth: 34,
                     height: 32,
                     p: 0,
                     fontWeight: 800,
