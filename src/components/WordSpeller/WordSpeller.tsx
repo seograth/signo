@@ -79,17 +79,17 @@ export const WordSpeller: React.FC<WordSpellerProps> = ({
                   justifyContent: 'center',
                   borderRadius: 2,
                   background: isCompleted
-                    ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(5, 150, 105, 0.4) 100%)'
+                    ? 'linear-gradient(135deg, rgba(6, 214, 160, 0.3) 0%, rgba(5, 179, 131, 0.4) 100%)'
                     : isCurrent
-                    ? 'linear-gradient(135deg, #FBBF24 0%, #D97706 100%)'
-                    : 'rgba(30, 41, 59, 0.8)',
+                    ? 'linear-gradient(135deg, #FFB703 0%, #E09F00 100%)'
+                    : 'rgba(34, 38, 52, 0.8)',
                   border: isCompleted
-                    ? '1.5px solid #10B981'
+                    ? '1.5px solid #06D6A0'
                     : isCurrent
-                    ? '1.5px solid #FDE68A'
+                    ? '1.5px solid #FFE395'
                     : '1px solid rgba(255, 255, 255, 0.12)',
                   boxShadow: isCurrent
-                    ? '0 0 10px rgba(251, 191, 36, 0.4)'
+                    ? '0 0 10px rgba(255, 183, 3, 0.4)'
                     : 'none',
                   transition: 'background 0.2s ease, border 0.2s ease',
                 }}
@@ -101,8 +101,8 @@ export const WordSpeller: React.FC<WordSpellerProps> = ({
                       top: -4,
                       right: -4,
                       fontSize: 13,
-                      color: '#10B981',
-                      background: '#0F172A',
+                      color: '#06D6A0',
+                      background: '#1A1D28',
                       borderRadius: '50%',
                     }}
                   />
@@ -112,7 +112,7 @@ export const WordSpeller: React.FC<WordSpellerProps> = ({
                   sx={{
                     fontWeight: 900,
                     fontSize: '0.9rem',
-                    color: isCurrent ? '#0F172A' : '#FFFFFF',
+                    color: isCurrent ? '#1A1D28' : '#FFFFFF',
                     lineHeight: 1,
                   }}
                 >
@@ -132,16 +132,16 @@ export const WordSpeller: React.FC<WordSpellerProps> = ({
           sx={{
             height: 24,
             fontSize: '0.7rem',
-            backgroundColor: 'rgba(99, 102, 241, 0.2)',
-            color: '#818CF8',
+            backgroundColor: 'rgba(0, 180, 216, 0.2)',
+            color: '#00B4D8',
             fontWeight: 800,
-            border: '1px solid rgba(99, 102, 241, 0.4)',
+            border: '1px solid rgba(0, 180, 216, 0.4)',
             px: 0.5,
           }}
         />
         {onToggleHint && (
           <Tooltip title={showHint ? `Hint: ${currentWord.hint}` : 'Show Hint'}>
-            <IconButton size='small' onClick={onToggleHint} sx={{ color: showHint ? '#FBBF24' : '#94A3B8', p: 0.4 }}>
+            <IconButton size='small' onClick={onToggleHint} sx={{ color: showHint ? '#FFB703' : '#94A3B8', p: 0.4 }}>
               <HelpOutlineIcon fontSize='small' />
             </IconButton>
           </Tooltip>

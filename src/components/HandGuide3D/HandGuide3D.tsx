@@ -177,20 +177,20 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
     fillLight.position.set(-6, -2, 5)
     scene.add(fillLight)
 
-    // Vibrant Purple Rim Light (Backlight Outline)
-    const rimLight = new THREE.DirectionalLight(0xa855f7, 3.0)
+    // Electric Cyan & Warm Amber Rim Lights
+    const rimLight = new THREE.DirectionalLight(0x00b4d8, 3.0)
     rimLight.position.set(0, -5, -4)
     scene.add(rimLight)
 
-    const topRimLight = new THREE.DirectionalLight(0x818cf8, 2.2)
+    const topRimLight = new THREE.DirectionalLight(0xffb703, 2.2)
     topRimLight.position.set(0, 7, -3)
     scene.add(topRimLight)
 
-    // 4. Vibrant Electric Purple Vinyl/Clay Material matching reference image
+    // 4. Vibrant Electric Cyan Material matching design system
     const handMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x6e20e8,        // Deep electric purple from reference image
+      color: 0x00b4d8,        // Electric Cyan (--color-brand-primary)
       roughness: 0.22,        // Glossy silicone / vinyl clay surface
-      metalness: 0.03,
+      metalness: 0.05,
       clearcoat: 0.55,        // High-end clearcoat shine
       clearcoatRoughness: 0.15,
       reflectivity: 0.6,
@@ -627,7 +627,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'radial-gradient(circle at center, rgba(110, 32, 232, 0.18) 0%, rgba(15, 23, 42, 0.98) 100%)',
+        background: 'radial-gradient(circle at center, rgba(0, 180, 216, 0.18) 0%, #1A1D28 100%)',
         overflow: 'hidden',
       }}
     >
@@ -648,7 +648,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           position: 'absolute',
           top: { xs: 10, sm: 20 },
           left: { xs: 10, sm: 20 },
-          background: 'rgba(15, 23, 42, 0.88)',
+          background: 'rgba(26, 29, 40, 0.90)',
           backdropFilter: 'blur(16px)',
           px: { xs: 1.5, sm: 2.5 },
           py: { xs: 0.6, sm: 1.0 },
@@ -661,10 +661,10 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           zIndex: 2,
         }}
       >
-        <Typography variant='subtitle1' sx={{ color: '#C084FC', fontWeight: 900, fontSize: { xs: '0.95rem', sm: '1.2rem' } }}>
+        <Typography variant='subtitle1' sx={{ color: '#00B4D8', fontWeight: 900, fontSize: { xs: '0.95rem', sm: '1.2rem' } }}>
           {letterInfo.letter} ({letterInfo.name})
         </Typography>
-        <Typography variant='caption' sx={{ color: '#818CF8', fontWeight: 700, fontSize: { xs: '0.75rem', sm: '0.85rem' } }}>
+        <Typography variant='caption' sx={{ color: '#FFB703', fontWeight: 700, fontSize: { xs: '0.75rem', sm: '0.85rem' } }}>
           • {selectedHand === 'right' ? 'Right Hand 🤚' : 'Left Hand ✋'}
         </Typography>
       </Box>
@@ -677,7 +677,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           right: { xs: 10, sm: 20 },
           display: 'flex',
           gap: 1.2,
-          background: 'rgba(15, 23, 42, 0.88)',
+          background: 'rgba(26, 29, 40, 0.90)',
           backdropFilter: 'blur(12px)',
           borderRadius: 4,
           p: { xs: 0.4, sm: 0.8 },
@@ -706,7 +706,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           bottom: { xs: 10, sm: 20 },
           left: { xs: 10, sm: 20 },
           maxWidth: { xs: '65%', sm: '75%' },
-          background: 'rgba(15, 23, 42, 0.88)',
+          background: 'rgba(26, 29, 40, 0.90)',
           backdropFilter: 'blur(12px)',
           px: { xs: 1.4, sm: 2.2 },
           py: { xs: 0.6, sm: 1.0 },
@@ -715,7 +715,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           zIndex: 2,
         }}
       >
-        <Typography variant='caption' sx={{ color: '#DDD6FE', fontSize: { xs: '0.78rem', sm: '0.9rem' }, fontWeight: 600, display: 'block' }}>
+        <Typography variant='caption' sx={{ color: '#E2E8F0', fontSize: { xs: '0.78rem', sm: '0.9rem' }, fontWeight: 600, display: 'block' }}>
           💡 {letterInfo.description}
         </Typography>
       </Box>

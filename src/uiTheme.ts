@@ -4,29 +4,35 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#6366F1', // Electric Indigo
-      light: '#818CF8',
-      dark: '#4338CA',
+      main: '#00B4D8', // Electric Cyan
+      light: '#48CAE4',
+      dark: '#0077B6',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#FBBF24', // Sunny Butter Gold
-      light: '#FDE68A',
-      dark: '#D97706',
-      contrastText: '#0F172A',
-    },
-    success: {
-      main: '#10B981', // Emerald
-      light: '#34D399',
-      dark: '#059669',
+      main: '#FF6B6B', // Vibrant Coral
+      light: '#FF8787',
+      dark: '#FA5252',
       contrastText: '#FFFFFF',
     },
+    success: {
+      main: '#06D6A0', // Success Mint
+      light: '#38EF7D',
+      dark: '#05B383',
+      contrastText: '#FFFFFF',
+    },
+    warning: {
+      main: '#FFB703', // Warm Amber
+      light: '#FFC83B',
+      dark: '#E09F00',
+      contrastText: '#1A1D28',
+    },
     background: {
-      default: '#0B0F19',
-      paper: '#111827',
+      default: '#1A1D28', // Deep Slate Navy
+      paper: '#222634',
     },
     text: {
-      primary: '#F8FAFC',
+      primary: '#FFFFFF',
       secondary: '#94A3B8',
     },
   },
@@ -63,7 +69,7 @@ const theme = createTheme({
     h6: {
       fontSize: '1rem',
       fontWeight: 600,
-      color: '#F8FAFC',
+      color: '#FFFFFF',
     },
     body1: {
       fontSize: '1rem',
@@ -91,21 +97,22 @@ const theme = createTheme({
           transition: 'all 0.2s ease',
         },
         containedPrimary: {
-          background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
-          boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
+          background: 'linear-gradient(135deg, #00B4D8 0%, #0077B6 100%)',
+          boxShadow: '0 4px 14px 0 rgba(0, 180, 216, 0.35)',
+          color: '#FFFFFF',
           '&:hover': {
-            background: 'linear-gradient(135deg, #4F46E5 0%, #4338CA 100%)',
-            boxShadow: '0 6px 20px rgba(99, 102, 241, 0.5)',
+            background: 'linear-gradient(135deg, #0077B6 0%, #023E8A 100%)',
+            boxShadow: '0 6px 20px rgba(0, 180, 216, 0.5)',
             transform: 'translateY(-1px)',
           },
         },
         containedSecondary: {
-          background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)',
-          color: '#0F172A',
-          boxShadow: '0 4px 14px 0 rgba(245, 158, 11, 0.35)',
+          background: 'linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%)',
+          color: '#FFFFFF',
+          boxShadow: '0 4px 14px 0 rgba(255, 107, 107, 0.35)',
           '&:hover': {
-            background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-            boxShadow: '0 6px 20px rgba(245, 158, 11, 0.45)',
+            background: 'linear-gradient(135deg, #EE5253 0%, #C82333 100%)',
+            boxShadow: '0 6px 20px rgba(255, 107, 107, 0.45)',
             transform: 'translateY(-1px)',
           },
         },
@@ -114,8 +121,8 @@ const theme = createTheme({
           color: '#FFFFFF',
           backdropFilter: 'blur(8px)',
           '&:hover': {
-            borderColor: '#818CF8',
-            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            borderColor: '#00B4D8',
+            backgroundColor: 'rgba(0, 180, 216, 0.1)',
           },
         },
       },
@@ -123,7 +130,7 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: 'rgba(11, 15, 25, 0.85)',
+          background: 'rgba(26, 29, 40, 0.90)',
           backdropFilter: 'blur(16px)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           boxShadow: 'none',
@@ -134,7 +141,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          backgroundColor: 'rgba(17, 24, 39, 0.75)',
+          backgroundColor: 'rgba(34, 38, 52, 0.85)',
           backdropFilter: 'blur(12px)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
         },

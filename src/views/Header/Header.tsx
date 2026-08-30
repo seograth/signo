@@ -58,9 +58,9 @@ export const Header: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)',
-                color: '#0F172A',
-                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.35)',
+                background: 'linear-gradient(135deg, #00B4D8 0%, #0077B6 100%)',
+                color: '#FFFFFF',
+                boxShadow: '0 4px 12px rgba(0, 180, 216, 0.35)',
               }}
             >
               <AutoAwesomeIcon sx={{ fontSize: 22 }} />
@@ -76,7 +76,7 @@ export const Header: React.FC = () => {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              Signi<span style={{ color: '#FBBF24', WebkitTextFillColor: '#FBBF24' }}>Fi</span>
+              Signi<span style={{ color: '#00B4D8', WebkitTextFillColor: '#00B4D8' }}>Fi</span>
             </Typography>
           </Box>
 
@@ -103,7 +103,7 @@ export const Header: React.FC = () => {
               sx={{
                 display: { xs: 'block', md: 'none' },
                 '& .MuiPaper-root': {
-                  background: 'rgba(15, 23, 42, 0.95)',
+                  background: 'rgba(26, 29, 40, 0.95)',
                   backdropFilter: 'blur(16px)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                   borderRadius: 3,
@@ -120,7 +120,7 @@ export const Header: React.FC = () => {
                     handleCloseNavMenu()
                   }}
                   sx={{
-                    color: location.pathname === page.redirect ? '#FBBF24' : '#E2E8F0',
+                    color: location.pathname === page.redirect ? '#00B4D8' : '#E2E8F0',
                     fontWeight: 600,
                     px: 3,
                     py: 1.2,
@@ -136,7 +136,7 @@ export const Header: React.FC = () => {
                   handleCloseNavMenu()
                 }}
                 sx={{
-                  color: '#FBBF24',
+                  color: '#00B4D8',
                   fontWeight: 800,
                   px: 3,
                   py: 1.2,
@@ -168,7 +168,7 @@ export const Header: React.FC = () => {
                 color: '#FFFFFF',
               }}
             >
-              Signi<span style={{ color: '#FBBF24' }}>Fi</span>
+              Signi<span style={{ color: '#00B4D8' }}>Fi</span>
             </Typography>
           </Box>
 
@@ -188,9 +188,9 @@ export const Header: React.FC = () => {
                     py: 0.8,
                     borderRadius: 3,
                     fontWeight: 700,
-                    color: isActive ? '#FBBF24' : '#94A3B8',
-                    background: isActive ? 'rgba(251, 191, 36, 0.12)' : 'transparent',
-                    border: isActive ? '1px solid rgba(251, 191, 36, 0.3)' : '1px solid transparent',
+                    color: isActive ? '#00B4D8' : '#94A3B8',
+                    background: isActive ? 'rgba(0, 180, 216, 0.12)' : 'transparent',
+                    border: isActive ? '1px solid rgba(0, 180, 216, 0.3)' : '1px solid transparent',
                     '&:hover': {
                       color: '#FFFFFF',
                       background: 'rgba(255, 255, 255, 0.06)',
@@ -204,7 +204,7 @@ export const Header: React.FC = () => {
 
             <Button
               variant='contained'
-              color='secondary'
+              color='primary'
               size='small'
               onClick={() => {
                 audioEngine.playPop()

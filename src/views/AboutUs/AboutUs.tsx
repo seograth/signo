@@ -19,7 +19,7 @@ export const AboutUs: React.FC = () => {
           <Typography
             variant='body1'
             sx={{
-              color: '#FBBF24',
+              color: '#00B4D8',
               fontWeight: 700,
               fontSize: '1.2rem',
               mb: 2,
@@ -39,11 +39,11 @@ export const AboutUs: React.FC = () => {
                 p: 4,
                 height: '100%',
                 borderRadius: 4,
-                background: 'rgba(17, 24, 39, 0.75)',
+                background: 'rgba(34, 38, 52, 0.85)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
               }}
             >
-              <FavoriteIcon sx={{ fontSize: 40, color: '#EC4899', mb: 2 }} />
+              <FavoriteIcon sx={{ fontSize: 40, color: '#FF6B6B', mb: 2 }} />
               <Typography variant='h5' sx={{ fontWeight: 700, mb: 1.5 }}>
                 Social Inclusion
               </Typography>
@@ -59,11 +59,11 @@ export const AboutUs: React.FC = () => {
                 p: 4,
                 height: '100%',
                 borderRadius: 4,
-                background: 'rgba(17, 24, 39, 0.75)',
+                background: 'rgba(34, 38, 52, 0.85)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
               }}
             >
-              <SchoolIcon sx={{ fontSize: 40, color: '#FBBF24', mb: 2 }} />
+              <SchoolIcon sx={{ fontSize: 40, color: '#FFB703', mb: 2 }} />
               <Typography variant='h5' sx={{ fontWeight: 700, mb: 1.5 }}>
                 Greek Sign Language (ΕΝΓ)
               </Typography>
@@ -79,11 +79,11 @@ export const AboutUs: React.FC = () => {
                 p: 4,
                 height: '100%',
                 borderRadius: 4,
-                background: 'rgba(17, 24, 39, 0.75)',
+                background: 'rgba(34, 38, 52, 0.85)',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
               }}
             >
-              <CodeIcon sx={{ fontSize: 40, color: '#6366F1', mb: 2 }} />
+              <CodeIcon sx={{ fontSize: 40, color: '#00B4D8', mb: 2 }} />
               <Typography variant='h5' sx={{ fontWeight: 700, mb: 1.5 }}>
                 Cutting-Edge Web AI
               </Typography>
@@ -97,7 +97,7 @@ export const AboutUs: React.FC = () => {
         <Box sx={{ textAlign: 'center' }}>
           <Button
             variant='contained'
-            color='secondary'
+            color='primary'
             size='large'
             onClick={() => navigate('/learn')}
             sx={{ px: 4, py: 1.5, fontWeight: 800, borderRadius: 3 }}

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Box, Button, Container, Typography, Paper } from '@mui/material'
 import Grid from '@mui/material/Grid2'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
@@ -9,9 +9,20 @@ import SpeedIcon from '@mui/icons-material/Speed'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import HandGuide3D from '../../components/HandGuide3D/HandGuide3D'
+import { GSL_ALPHABET } from '../../services/gslDictionary'
 
 export const Home: React.FC = () => {
   const navigate = useNavigate()
+  const [demoLetter, setDemoLetter] = useState<string>('Α')
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * GSL_ALPHABET.length)
+      setDemoLetter(GSL_ALPHABET[randomIndex].letter)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <Box sx={{ minHeight: '100%', py: { xs: 4, md: 8 }, overflowY: 'auto' }}>
@@ -31,16 +42,16 @@ export const Home: React.FC = () => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 1,
-                  background: 'rgba(99, 102, 241, 0.15)',
-                  border: '1px solid rgba(99, 102, 241, 0.3)',
+                  background: 'rgba(0, 180, 216, 0.15)',
+                  border: '1px solid rgba(0, 180, 216, 0.3)',
                   borderRadius: 4,
                   px: 2,
                   py: 0.8,
                   mb: 3,
                 }}
               >
-                <AutoAwesomeIcon sx={{ color: '#FBBF24', fontSize: 18 }} />
-                <Typography variant='caption' sx={{ color: '#FDE68A', fontWeight: 800 }}>
+                <AutoAwesomeIcon sx={{ color: '#00B4D8', fontSize: 18 }} />
+                <Typography variant='caption' sx={{ color: '#48CAE4', fontWeight: 800 }}>
                   Greek Sign Language (ΕΝΓ) Fingerspelling AI
                 </Typography>
               </Box>
@@ -60,7 +71,7 @@ export const Home: React.FC = () => {
                 Learn Sign Language, <br />
                 <span
                   style={{
-                    background: 'linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%)',
+                    background: 'linear-gradient(135deg, #00B4D8 0%, #48CAE4 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                   }}
@@ -85,7 +96,7 @@ export const Home: React.FC = () => {
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                 <Button
                   variant='contained'
-                  color='secondary'
+                  color='primary'
                   size='large'
                   startIcon={<PlayArrowIcon />}
                   onClick={() => navigate('/learn')}
@@ -144,13 +155,13 @@ export const Home: React.FC = () => {
                     width: 300,
                     height: 300,
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(0,0,0,0) 70%)',
+                    background: 'radial-gradient(circle, rgba(0, 180, 216, 0.25) 0%, rgba(0,0,0,0) 70%)',
                     filter: 'blur(40px)',
                     zIndex: 0,
                   }}
                 />
 
-                <HandGuide3D currentLetter='Α' selectedHand='right' />
+                <HandGuide3D currentLetter={demoLetter} selectedHand='right' />
               </Box>
             </motion.div>
           </Grid>
@@ -175,12 +186,12 @@ export const Home: React.FC = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   borderRadius: 4,
-                  background: 'rgba(17, 24, 39, 0.7)',
+                  background: 'rgba(34, 38, 52, 0.85)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                   transition: 'transform 0.2s ease, border-color 0.2s ease',
                   '&:hover': {
                     transform: 'translateY(-4px)',
-                    borderColor: 'rgba(99, 102, 241, 0.4)',
+                    borderColor: 'rgba(0, 180, 216, 0.4)',
                   },
                 }}
               >
@@ -192,8 +203,8 @@ export const Home: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'rgba(99, 102, 241, 0.15)',
-                    color: '#818CF8',
+                    background: 'rgba(0, 180, 216, 0.15)',
+                    color: '#00B4D8',
                     mb: 2,
                   }}
                 >
@@ -217,12 +228,12 @@ export const Home: React.FC = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   borderRadius: 4,
-                  background: 'rgba(17, 24, 39, 0.7)',
+                  background: 'rgba(34, 38, 52, 0.85)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                   transition: 'transform 0.2s ease, border-color 0.2s ease',
                   '&:hover': {
                     transform: 'translateY(-4px)',
-                    borderColor: 'rgba(251, 191, 36, 0.4)',
+                    borderColor: 'rgba(255, 183, 3, 0.4)',
                   },
                 }}
               >
@@ -234,8 +245,8 @@ export const Home: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'rgba(251, 191, 36, 0.15)',
-                    color: '#FBBF24',
+                    background: 'rgba(255, 183, 3, 0.15)',
+                    color: '#FFB703',
                     mb: 2,
                   }}
                 >
@@ -259,12 +270,12 @@ export const Home: React.FC = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   borderRadius: 4,
-                  background: 'rgba(17, 24, 39, 0.7)',
+                  background: 'rgba(34, 38, 52, 0.85)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                   transition: 'transform 0.2s ease, border-color 0.2s ease',
                   '&:hover': {
                     transform: 'translateY(-4px)',
-                    borderColor: 'rgba(16, 185, 129, 0.4)',
+                    borderColor: 'rgba(6, 214, 160, 0.4)',
                   },
                 }}
               >
@@ -276,8 +287,8 @@ export const Home: React.FC = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'rgba(16, 185, 129, 0.15)',
-                    color: '#10B981',
+                    background: 'rgba(6, 214, 160, 0.15)',
+                    color: '#06D6A0',
                     mb: 2,
                   }}
                 >

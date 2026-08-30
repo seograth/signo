@@ -184,10 +184,10 @@ export const Learn: React.FC = () => {
             setSpeedActive(false)
             setSpeedFinished(false)
           }}
-          textColor='secondary'
-          indicatorColor='secondary'
+          textColor='primary'
+          indicatorColor='primary'
           sx={{
-            background: 'rgba(17, 24, 39, 0.8)',
+            background: 'rgba(34, 38, 52, 0.85)',
             backdropFilter: 'blur(12px)',
             borderRadius: 3.5,
             p: 0.4,
@@ -201,7 +201,7 @@ export const Learn: React.FC = () => {
               borderRadius: 3,
               color: '#94A3B8',
               '&.Mui-selected': {
-                color: '#FBBF24',
+                color: '#00B4D8',
               },
             },
           }}
@@ -234,7 +234,7 @@ export const Learn: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               gap: 0.5,
-              background: 'rgba(17, 24, 39, 0.8)',
+              background: 'rgba(34, 38, 52, 0.85)',
               backdropFilter: 'blur(12px)',
               px: 1,
               py: 0.4,
@@ -263,7 +263,7 @@ export const Learn: React.FC = () => {
                 <Button
                   key={item.letter}
                   variant={idx === alphabetIndex ? 'contained' : 'text'}
-                  color={idx === alphabetIndex ? 'secondary' : 'inherit'}
+                  color={idx === alphabetIndex ? 'primary' : 'inherit'}
                   size='small'
                   onClick={() => {
                     audioEngine.playPop()
@@ -276,7 +276,7 @@ export const Learn: React.FC = () => {
                     fontWeight: 800,
                     fontSize: '0.85rem',
                     borderRadius: 2,
-                    color: idx === alphabetIndex ? '#000000' : '#CBD5E1',
+                    color: idx === alphabetIndex ? '#FFFFFF' : '#CBD5E1',
                   }}
                 >
                   {item.letter}
@@ -310,14 +310,14 @@ export const Learn: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(245, 158, 11, 0.15) 100%)',
+                background: 'linear-gradient(135deg, rgba(0, 180, 216, 0.2) 0%, rgba(255, 183, 3, 0.15) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 borderRadius: 3.5,
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <TimerIcon sx={{ color: speedTimer <= 10 ? '#EF4444' : '#FBBF24', fontSize: 22 }} />
-                <Typography variant='caption' sx={{ fontWeight: 800, color: speedTimer <= 10 ? '#EF4444' : '#FFFFFF', fontSize: '0.85rem' }}>
+                <TimerIcon sx={{ color: speedTimer <= 10 ? '#FF6B6B' : '#FFB703', fontSize: 22 }} />
+                <Typography variant='caption' sx={{ fontWeight: 800, color: speedTimer <= 10 ? '#FF6B6B' : '#FFFFFF', fontSize: '0.85rem' }}>
                   {speedActive ? `${speedTimer}s` : speedFinished ? 'Done' : '60s'}
                 </Typography>
               </Box>
@@ -333,7 +333,7 @@ export const Learn: React.FC = () => {
                     borderRadius: 3,
                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
                     '& .MuiLinearProgress-bar': {
-                      backgroundColor: speedTimer <= 10 ? '#EF4444' : '#FBBF24',
+                      backgroundColor: speedTimer <= 10 ? '#FF6B6B' : '#00B4D8',
                       borderRadius: 3,
                     },
                   }}
@@ -341,7 +341,7 @@ export const Learn: React.FC = () => {
               ) : (
                 <Button
                   variant='contained'
-                  color='secondary'
+                  color='primary'
                   size='small'
                   onClick={startSpeedRush}
                   sx={{ borderRadius: 2.5, fontWeight: 800, py: 0.2, px: 1.5, fontSize: '0.78rem' }}
@@ -361,15 +361,15 @@ export const Learn: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.5,
-                background: 'rgba(245, 158, 11, 0.15)',
-                border: '1px solid rgba(245, 158, 11, 0.3)',
+                background: 'rgba(255, 183, 3, 0.15)',
+                border: '1px solid rgba(255, 183, 3, 0.3)',
                 px: 1.2,
                 height: 38,
                 borderRadius: 2.5,
               }}
             >
-              <LocalFireDepartmentIcon sx={{ color: '#F59E0B', fontSize: 18 }} />
-              <Typography variant='caption' sx={{ color: '#FBBF24', fontWeight: 800 }}>
+              <LocalFireDepartmentIcon sx={{ color: '#FFB703', fontSize: 18 }} />
+              <Typography variant='caption' sx={{ color: '#FFB703', fontWeight: 800 }}>
                 {streak}
               </Typography>
             </Box>
@@ -381,15 +381,15 @@ export const Learn: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 0.5,
-                background: 'rgba(99, 102, 241, 0.2)',
-                border: '1px solid rgba(99, 102, 241, 0.4)',
+                background: 'rgba(0, 180, 216, 0.2)',
+                border: '1px solid rgba(0, 180, 216, 0.4)',
                 px: 1.2,
                 height: 38,
                 borderRadius: 2.5,
               }}
             >
-              <EmojiEventsIcon sx={{ color: '#818CF8', fontSize: 18 }} />
-              <Typography variant='caption' sx={{ color: '#818CF8', fontWeight: 800 }}>
+              <EmojiEventsIcon sx={{ color: '#00B4D8', fontSize: 18 }} />
+              <Typography variant='caption' sx={{ color: '#00B4D8', fontWeight: 800 }}>
                 {score}
               </Typography>
             </Box>

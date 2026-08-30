@@ -12,25 +12,25 @@ export const HowTo: React.FC = () => {
 
   const steps = [
     {
-      icon: <VideocamIcon sx={{ fontSize: 36, color: '#6366F1' }} />,
+      icon: <VideocamIcon sx={{ fontSize: 36, color: '#00B4D8' }} />,
       step: 'Step 1',
       title: 'Position Your Camera & Lighting',
       desc: 'Allow browser webcam access and position your hand roughly 30-50cm from the camera. Ensure good ambient lighting without harsh backlights.',
     },
     {
-      icon: <PanToolIcon sx={{ fontSize: 36, color: '#FBBF24' }} />,
+      icon: <PanToolIcon sx={{ fontSize: 36, color: '#FFB703' }} />,
       step: 'Step 2',
       title: 'Inspect the 3D Guide',
       desc: 'Look at the 3D hand model demonstrating the target Greek letter. You can click and drag the 3D hand to rotate it and inspect finger bends from any angle.',
     },
     {
-      icon: <CheckCircleOutlineIcon sx={{ fontSize: 36, color: '#10B981' }} />,
+      icon: <CheckCircleOutlineIcon sx={{ fontSize: 36, color: '#06D6A0' }} />,
       step: 'Step 3',
       title: 'Form & Hold the Sign',
       desc: 'Mimic the hand shape with your hand. When your sign matches, the glowing green feedback and confidence ring will charge up for 0.8 seconds.',
     },
     {
-      icon: <EmojiEventsIcon sx={{ fontSize: 36, color: '#EC4899' }} />,
+      icon: <EmojiEventsIcon sx={{ fontSize: 36, color: '#FF6B6B' }} />,
       step: 'Step 4',
       title: 'Complete Words & Build Streaks',
       desc: 'Spell complete Greek words letter by letter to earn celebratory confetti, level up your vocabulary, or race the clock in 60s Speed Rush!',
@@ -59,12 +59,12 @@ export const HowTo: React.FC = () => {
                   display: 'flex',
                   flexDirection: 'column',
                   borderRadius: 4,
-                  background: 'rgba(17, 24, 39, 0.75)',
+                  background: 'rgba(34, 38, 52, 0.85)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                 }}
               >
                 <Box sx={{ mb: 2 }}>{item.icon}</Box>
-                <Typography variant='caption' sx={{ color: '#FBBF24', fontWeight: 800 }}>
+                <Typography variant='caption' sx={{ color: '#FFB703', fontWeight: 800 }}>
                   {item.step}
                 </Typography>
                 <Typography variant='h6' sx={{ fontWeight: 700, my: 1 }}>
@@ -81,25 +81,28 @@ export const HowTo: React.FC = () => {
         {/* CTA Banner */}
         <Paper
           sx={{
-            p: { xs: 3, md: 5 },
-            borderRadius: 5,
+            p: { xs: 2.5, md: 3.5 },
+            mb: { xs: 6, md: 8 },
+            maxWidth: 640,
+            mx: 'auto',
+            borderRadius: 4,
             textAlign: 'center',
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(245, 158, 11, 0.15) 100%)',
+            background: 'linear-gradient(135deg, rgba(0, 180, 216, 0.2) 0%, rgba(255, 183, 3, 0.15) 100%)',
             border: '1px solid rgba(255, 255, 255, 0.12)',
           }}
         >
-          <Typography variant='h4' sx={{ fontWeight: 800, mb: 1.5 }}>
+          <Typography variant='h5' sx={{ fontWeight: 800, mb: 1 }}>
             Ready to test your signing skills?
           </Typography>
-          <Typography variant='body1' sx={{ color: '#CBD5E1', mb: 3, maxWidth: 500, mx: 'auto' }}>
+          <Typography variant='body2' sx={{ color: '#CBD5E1', mb: 2, maxWidth: 460, mx: 'auto' }}>
             Jump right in and start practicing with the interactive 3D hand and real-time webcam feedback!
           </Typography>
           <Button
             variant='contained'
-            color='secondary'
-            size='large'
+            color='primary'
+            size='medium'
             onClick={() => navigate('/learn')}
-            sx={{ px: 4, py: 1.5, fontWeight: 800, borderRadius: 3 }}
+            sx={{ px: 3, py: 1, fontWeight: 800, borderRadius: 3 }}
           >
             Launch Practice Studio 🚀
           </Button>

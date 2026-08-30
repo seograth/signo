@@ -307,9 +307,9 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
   const drawGlowingSkeleton = (ctx: CanvasRenderingContext2D, landmarks: any[], w: number, h: number) => {
     ctx.save()
-    ctx.shadowBlur = 12
-    ctx.shadowColor = '#06B6D4'
-    ctx.strokeStyle = '#22D3EE'
+    ctx.shadowBlur = 10
+    ctx.shadowColor = '#00B4D8'
+    ctx.strokeStyle = '#00B4D8'
     ctx.lineWidth = 4.0
     ctx.lineCap = 'round'
 
@@ -330,9 +330,9 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
       ctx.beginPath()
       ctx.arc(p.x * w, p.y * h, radius, 0, 2 * Math.PI)
-      ctx.fillStyle = isFingertip ? '#10B981' : '#FBBF24'
-      ctx.shadowBlur = 14
-      ctx.shadowColor = isFingertip ? '#10B981' : '#F59E0B'
+      ctx.fillStyle = isFingertip ? '#06D6A0' : '#FFB703'
+      ctx.shadowBlur = 12
+      ctx.shadowColor = isFingertip ? '#06D6A0' : '#FFB703'
       ctx.fill()
     })
 
@@ -359,7 +359,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
-        background: '#0B0F19',
+        background: '#1A1D28',
         borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
       }}
     >
@@ -378,11 +378,13 @@ export const CameraView: React.FC<CameraViewProps> = ({
           objectFit: 'cover',
           transform: videoTransform,
           transformOrigin: 'center center',
+          background: '#1A1D28',
+          filter: 'brightness(0.50) contrast(1.20)',
           display: cameraActive ? 'block' : 'none',
         }}
       />
 
-      {/* Full-bleed Real-time Skeleton Overlay Canvas */}
+      {/* Full-bleed Landmark Overlay Canvas */}
       <canvas
         ref={canvasRef}
         style={{
@@ -391,10 +393,11 @@ export const CameraView: React.FC<CameraViewProps> = ({
           left: 0,
           width: '100%',
           height: '100%',
+          pointerEvents: 'none',
           objectFit: 'cover',
           transform: videoTransform,
           transformOrigin: 'center center',
-          pointerEvents: 'none',
+          zIndex: 1,
         }}
       />
 
@@ -402,7 +405,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
       {!cameraActive && (
         <Box sx={{ textAlign: 'center', p: 3, zIndex: 2 }}>
           <VideocamOffIcon sx={{ fontSize: 48, color: '#94A3B8', mb: 1 }} />
-          <Typography variant='body1' sx={{ color: '#E2E8F0', fontWeight: 600 }}>
+          <Typography variant='body1' sx={{ color: '#FFFFFF', fontWeight: 600 }}>
             Camera is paused
           </Typography>
           <Button
@@ -429,12 +432,12 @@ export const CameraView: React.FC<CameraViewProps> = ({
             justifyContent: 'center',
             textAlign: 'center',
             p: 3,
-            background: 'rgba(15, 23, 42, 0.95)',
+            background: 'rgba(26, 29, 40, 0.95)',
             zIndex: 5,
           }}
         >
-          <WarningAmberIcon sx={{ fontSize: 44, color: '#F59E0B', mb: 1 }} />
-          <Typography variant='h6' sx={{ color: '#E2E8F0', fontWeight: 700 }}>
+          <WarningAmberIcon sx={{ fontSize: 44, color: '#FFB703', mb: 1 }} />
+          <Typography variant='h6' sx={{ color: '#FFFFFF', fontWeight: 700 }}>
             Camera Access Needed
           </Typography>
           <Typography variant='body2' sx={{ color: '#94A3B8', maxWidth: 360, mt: 0.5, mb: 2 }}>
@@ -460,17 +463,17 @@ export const CameraView: React.FC<CameraViewProps> = ({
           top: { xs: 10, sm: 20 },
           left: { xs: 10, sm: 20 },
           minWidth: { xs: 180, sm: 230 },
-          background: isMatch ? 'rgba(6, 78, 59, 0.94)' : 'rgba(15, 23, 42, 0.88)',
+          background: isMatch ? 'rgba(6, 214, 160, 0.18)' : 'rgba(26, 29, 40, 0.90)',
           backdropFilter: 'blur(16px)',
           px: { xs: 1.5, sm: 2.4 },
           py: { xs: 0.7, sm: 1.1 },
           borderRadius: 4,
-          border: `1.5px solid ${isMatch ? '#10B981' : 'rgba(255, 255, 255, 0.12)'}`,
+          border: `1.5px solid ${isMatch ? '#06D6A0' : 'rgba(255, 255, 255, 0.12)'}`,
           display: 'flex',
           flexDirection: 'column',
           gap: 0.6,
           zIndex: 3,
-          boxShadow: isMatch ? '0 0 24px rgba(16, 185, 129, 0.5)' : '0 8px 32px rgba(0,0,0,0.5)',
+          boxShadow: isMatch ? '0 0 24px rgba(6, 214, 160, 0.5)' : '0 8px 32px rgba(0,0,0,0.5)',
           transition: 'all 0.25s ease',
         }}
       >
@@ -481,8 +484,8 @@ export const CameraView: React.FC<CameraViewProps> = ({
                 width: 10,
                 height: 10,
                 borderRadius: '50%',
-                backgroundColor: isHandInView ? (isMatch ? '#10B981' : '#FBBF24') : '#EF4444',
-                boxShadow: `0 0 8px ${isHandInView ? (isMatch ? '#10B981' : '#FBBF24') : '#EF4444'}`,
+                backgroundColor: isHandInView ? (isMatch ? '#06D6A0' : '#FFB703') : '#FF6B6B',
+                boxShadow: `0 0 8px ${isHandInView ? (isMatch ? '#06D6A0' : '#FFB703') : '#FF6B6B'}`,
               }}
             />
             <Typography variant='caption' sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: { xs: '0.8rem', sm: '0.95rem' } }}>
@@ -499,7 +502,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
           </Box>
 
           {isMatch && (
-            <CheckCircleIcon sx={{ fontSize: { xs: 16, sm: 20 }, color: '#10B981' }} />
+            <CheckCircleIcon sx={{ fontSize: { xs: 16, sm: 20 }, color: '#06D6A0' }} />
           )}
         </Box>
 
@@ -514,8 +517,8 @@ export const CameraView: React.FC<CameraViewProps> = ({
                 borderRadius: 4,
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 '& .MuiLinearProgress-bar': {
-                  backgroundColor: '#10B981',
-                  boxShadow: '0 0 12px #10B981',
+                  backgroundColor: '#06D6A0',
+                  boxShadow: '0 0 12px #06D6A0',
                   borderRadius: 4,
                 },
               }}
@@ -527,7 +530,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
         ) : (
           targetLetter && (
             <Typography variant='caption' sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
-              Target: <strong style={{ color: '#FBBF24' }}>{targetLetter}</strong>
+              Target: <strong style={{ color: '#FFB703' }}>{targetLetter}</strong>
             </Typography>
           )
         )}
@@ -541,7 +544,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
           right: { xs: 10, sm: 20 },
           display: 'flex',
           gap: 1.2,
-          background: 'rgba(15, 23, 42, 0.88)',
+          background: 'rgba(26, 29, 40, 0.90)',
           backdropFilter: 'blur(12px)',
           borderRadius: 4,
           p: { xs: 0.4, sm: 0.8 },

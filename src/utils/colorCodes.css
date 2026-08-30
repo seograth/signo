@@ -1,56 +1,52 @@
 :root {
-  --mainColor: #00539b;
-  --mainColorHover: #0263b891;
-  --mainColorSelected: #4caf50;
-  --mainBgColor: #f1f1f1;
+  --mainColor: #00B4D8;
+  --mainColorHover: rgba(0, 180, 216, 0.7);
+  --mainColorSelected: #06D6A0;
+  --mainBgColor: #1A1D28;
 
-  --mainShadow: 0px 1px 8px 0px rgba(0, 0, 0, 0.12), 0px 3px 4px 0px rgba(0, 0, 0, 0.14),
-    0px 3px 3px -2px rgba(0, 0, 0, 0.2);
-  --hoverShadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  --mainShadow: 0px 1px 8px 0px rgba(0, 0, 0, 0.25), 0px 3px 4px 0px rgba(0, 0, 0, 0.3);
+  --hoverShadow: rgba(0, 180, 216, 0.35) 0px 5px 15px;
 
-  --lightText: #ffffff;
-  --greyText: #7f7f7f;
+  --lightText: #FFFFFF;
+  --greyText: #94A3B8;
 
-  --lightBg: #ffffff;
-  --darkBg: #000000;
-  --disabledBg: #dae1e9;
-  --advantageBg: #ff9800;
-  --campaignAdvantageBg: #4caf50;
+  --lightBg: #F4F6F9;
+  --darkBg: #1A1D28;
+  --disabledBg: #2A2F3D;
+  --advantageBg: #FFB703;
+  --campaignAdvantageBg: #06D6A0;
 
-  --lightBorder: #ffffff;
-  --selectedBorder: #4caf50;
-  --greyBorder: #c4c4c4;
-  --grey2Border: #e0e0e0;
+  --lightBorder: #FFFFFF;
+  --selectedBorder: #06D6A0;
+  --greyBorder: rgba(255, 255, 255, 0.12);
+  --grey2Border: rgba(255, 255, 255, 0.08);
 
-  --ribbonBg: #2ca7d8 linear-gradient(45deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.25) 100%);
+  --ribbonBg: #00B4D8 linear-gradient(45deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.25) 100%);
 }
 
 .boxShadow-main {
-  box-shadow:
-    0px 1px 8px 0px rgba(0, 0, 0, 0.12),
-    0px 3px 4px 0px rgba(0, 0, 0, 0.14),
-    0px 3px 3px -2px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0px 4px 14px 0px rgba(0, 180, 216, 0.3) !important;
 }
 
 .boxShadow-dark {
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px !important;
+  box-shadow: rgba(0, 0, 0, 0.5) 0px 5px 15px !important;
 }
 .boxShadow-light {
-  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px !important;
+  box-shadow: rgba(0, 180, 216, 0.2) 0px 2px 8px 0px !important;
 }
 
 .border-main {
-  border: 2px solid #e2e5e8 !important;
+  border: 2px solid #00B4D8 !important;
 }
 
 .border-light {
-  border: 2px solid #4caf50 !important;
+  border: 2px solid #06D6A0 !important;
 }
 
 .border-secondary {
-  border: 1px solid #e0e0e0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 .border-lighter {
-  border: 1px solid #4caf50 !important;
+  border: 1px solid #06D6A0 !important;
 }
