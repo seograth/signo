@@ -14,7 +14,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import audioEngine from '../../services/audioEngine'
 
 const pages = [
-  { label: 'Practice Studio', redirect: '/learn' },
+  { label: 'Home', redirect: '/' },
   { label: 'How It Works', redirect: '/how-to' },
   { label: 'About Us', redirect: '/about-us' },
 ]
@@ -129,6 +129,21 @@ export const Header: React.FC = () => {
                   <Typography>{page.label}</Typography>
                 </MenuItem>
               ))}
+              <MenuItem
+                onClick={() => {
+                  audioEngine.playPop()
+                  navigate('/learn')
+                  handleCloseNavMenu()
+                }}
+                sx={{
+                  color: '#FBBF24',
+                  fontWeight: 800,
+                  px: 3,
+                  py: 1.2,
+                }}
+              >
+                <Typography sx={{ fontWeight: 800 }}>Start Practice 🚀</Typography>
+              </MenuItem>
             </Menu>
           </Box>
 

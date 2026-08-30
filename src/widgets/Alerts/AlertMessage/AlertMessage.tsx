@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { AlertsContext } from '../AlertsProvider/AlertsProvider'
+import { AlertsContext } from '../AlertsProvider/AlertsContext'
 import Snackbar from '@mui/material/Snackbar'
 import MuiAlert, { AlertProps } from '@mui/material/Alert'
 

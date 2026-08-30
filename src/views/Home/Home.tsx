@@ -14,7 +14,7 @@ export const Home: React.FC = () => {
   const navigate = useNavigate()
 
   return (
-    <Box sx={{ minHeight: '100%', py: { xs: 4, md: 8 }, overflow: 'hidden' }}>
+    <Box sx={{ minHeight: '100%', py: { xs: 4, md: 8 }, overflowY: 'auto' }}>
       <Container maxWidth='lg'>
         {/* Hero Section */}
         <Grid container spacing={6} sx={{ alignItems: 'center' }}>
@@ -124,7 +124,17 @@ export const Home: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
-              <Box sx={{ position: 'relative' }}>
+              <Box
+                sx={{
+                  position: 'relative',
+                  width: '100%',
+                  height: { xs: 340, sm: 440, md: 500 },
+                  borderRadius: 5,
+                  overflow: 'hidden',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
+                }}
+              >
                 {/* Floating Glow Sphere */}
                 <Box
                   sx={{

@@ -1,34 +1,8 @@
-import React, { createContext, useState } from 'react'
+import React, { useState } from 'react'
 import { AlertColor } from '@mui/material/Alert'
+import { AlertsContext, contextDefaultValues } from './AlertsContext'
 
-type AlertsContextState = {
-  alertOpen: boolean
-  setAlertOpen: React.Dispatch<React.SetStateAction<boolean>>
-  alertProperties: {
-    type: AlertColor | undefined
-    message: string
-  }
-  setAlertProperties: React.Dispatch<
-    React.SetStateAction<{
-      type: AlertColor | undefined
-      message: string
-    }>
-  >
-}
-
-const contextDefaultValues: AlertsContextState = {
-  alertOpen: false,
-  setAlertOpen: () => {},
-  alertProperties: {
-    type: undefined,
-    message: '',
-  },
-  setAlertProperties: () => {},
-}
-
-export const AlertsContext = createContext<AlertsContextState>(contextDefaultValues)
-
-const AlertsProvider = ({ children }: any) => {
+const AlertsProvider = ({ children }: { children: React.ReactNode }) => {
   const [alertOpen, setAlertOpen] = useState<boolean>(contextDefaultValues.alertOpen)
   const [alertProperties, setAlertProperties] = useState<{
     type: AlertColor | undefined

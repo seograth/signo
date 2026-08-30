@@ -202,7 +202,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
           handsWorkerRef.current = hands
         }
-      } catch (e) {
+      } catch {
         console.info('Using WebGL camera tracking loop.')
       }
     }
@@ -215,6 +215,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
         handsWorkerRef.current.close()
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Process Video Frame Loop
@@ -237,7 +238,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
           if (handsWorkerRef.current) {
             try {
               await handsWorkerRef.current.send({ image: video })
-            } catch (err) {
+            } catch {
               // Frame dropped, continue
             }
           }
@@ -456,13 +457,13 @@ export const CameraView: React.FC<CameraViewProps> = ({
       <Box
         sx={{
           position: 'absolute',
-          top: 20,
-          left: 20,
-          minWidth: 230,
+          top: { xs: 10, sm: 20 },
+          left: { xs: 10, sm: 20 },
+          minWidth: { xs: 180, sm: 230 },
           background: isMatch ? 'rgba(6, 78, 59, 0.94)' : 'rgba(15, 23, 42, 0.88)',
           backdropFilter: 'blur(16px)',
-          px: 2.4,
-          py: 1.1,
+          px: { xs: 1.5, sm: 2.4 },
+          py: { xs: 0.7, sm: 1.1 },
           borderRadius: 4,
           border: `1.5px solid ${isMatch ? '#10B981' : 'rgba(255, 255, 255, 0.12)'}`,
           display: 'flex',
@@ -484,7 +485,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
                 boxShadow: `0 0 8px ${isHandInView ? (isMatch ? '#10B981' : '#FBBF24') : '#EF4444'}`,
               }}
             />
-            <Typography variant='caption' sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: '0.95rem' }}>
+            <Typography variant='caption' sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: { xs: '0.8rem', sm: '0.95rem' } }}>
               {isCoolingDown
                 ? `Next: ${targetLetter || ''}`
                 : isHandInView
@@ -498,7 +499,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
           </Box>
 
           {isMatch && (
-            <CheckCircleIcon sx={{ fontSize: 20, color: '#10B981' }} />
+            <CheckCircleIcon sx={{ fontSize: { xs: 16, sm: 20 }, color: '#10B981' }} />
           )}
         </Box>
 
@@ -536,31 +537,31 @@ export const CameraView: React.FC<CameraViewProps> = ({
       <Box
         sx={{
           position: 'absolute',
-          bottom: 20,
-          right: 20,
+          bottom: { xs: 10, sm: 20 },
+          right: { xs: 10, sm: 20 },
           display: 'flex',
           gap: 1.2,
           background: 'rgba(15, 23, 42, 0.88)',
           backdropFilter: 'blur(12px)',
           borderRadius: 4,
-          p: 0.8,
+          p: { xs: 0.4, sm: 0.8 },
           border: '1px solid rgba(255, 255, 255, 0.12)',
           zIndex: 2,
         }}
       >
         <Tooltip title={cameraActive ? 'Turn Camera Off' : 'Turn Camera On'}>
-          <IconButton onClick={toggleCamera} sx={{ color: '#E2E8F0' }}>
-            {cameraActive ? <VideocamIcon /> : <VideocamOffIcon />}
+          <IconButton onClick={toggleCamera} size='small' sx={{ color: '#E2E8F0' }}>
+            {cameraActive ? <VideocamIcon fontSize='small' /> : <VideocamOffIcon fontSize='small' />}
           </IconButton>
         </Tooltip>
         <Tooltip title='Flip Camera'>
-          <IconButton onClick={toggleFacingMode} sx={{ color: '#E2E8F0' }}>
-            <FlipCameraIosIcon />
+          <IconButton onClick={toggleFacingMode} size='small' sx={{ color: '#E2E8F0' }}>
+            <FlipCameraIosIcon fontSize='small' />
           </IconButton>
         </Tooltip>
         <Tooltip title='Reload Camera Stream'>
-          <IconButton onClick={() => initWebcam()} sx={{ color: '#E2E8F0' }}>
-            <RefreshIcon />
+          <IconButton onClick={() => initWebcam()} size='small' sx={{ color: '#E2E8F0' }}>
+            <RefreshIcon fontSize='small' />
           </IconButton>
         </Tooltip>
       </Box>

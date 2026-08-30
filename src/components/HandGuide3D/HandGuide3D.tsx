@@ -577,13 +577,21 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
 
     const handleResize = () => {
       if (!container) return
-      const w = container.clientWidth
-      const h = container.clientHeight
-      camera.aspect = w / h
+      const w = container.clientWidth || window.innerWidth / 2
+      const h = container.clientHeight || window.innerHeight
+      const aspect = w / h
+      camera.aspect = aspect
+      // Dynamic Responsive FOV: expands camera field of view on narrow aspect ratios (e.g. mobile portrait)
+      camera.fov = aspect < 1.0 ? Math.min(65, 40 / aspect) : 40
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     }
 
+    handleResize()
+
+    const resizeObserver = new ResizeObserver(handleResize)
+    resizeObserver.observe(container)
     window.addEventListener('resize', handleResize)
 
     return () => {
@@ -595,6 +603,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       window.removeEventListener('touchmove', handleTouchMove)
       window.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('resize', handleResize)
+      resizeObserver.disconnect()
       renderer.dispose()
     }
   }, [selectedHand])
@@ -637,25 +646,25 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       <Box
         sx={{
           position: 'absolute',
-          top: 20,
-          left: 20,
+          top: { xs: 10, sm: 20 },
+          left: { xs: 10, sm: 20 },
           background: 'rgba(15, 23, 42, 0.88)',
           backdropFilter: 'blur(16px)',
-          px: 2.5,
-          py: 1.0,
+          px: { xs: 1.5, sm: 2.5 },
+          py: { xs: 0.6, sm: 1.0 },
           borderRadius: 4,
           border: '1px solid rgba(255, 255, 255, 0.12)',
           display: 'flex',
           alignItems: 'center',
-          gap: 1.4,
+          gap: { xs: 0.8, sm: 1.4 },
           boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
           zIndex: 2,
         }}
       >
-        <Typography variant='subtitle1' sx={{ color: '#C084FC', fontWeight: 900, fontSize: '1.2rem' }}>
+        <Typography variant='subtitle1' sx={{ color: '#C084FC', fontWeight: 900, fontSize: { xs: '0.95rem', sm: '1.2rem' } }}>
           {letterInfo.letter} ({letterInfo.name})
         </Typography>
-        <Typography variant='caption' sx={{ color: '#818CF8', fontWeight: 700, fontSize: '0.85rem' }}>
+        <Typography variant='caption' sx={{ color: '#818CF8', fontWeight: 700, fontSize: { xs: '0.75rem', sm: '0.85rem' } }}>
           • {selectedHand === 'right' ? 'Right Hand 🤚' : 'Left Hand ✋'}
         </Typography>
       </Box>
@@ -664,28 +673,28 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       <Box
         sx={{
           position: 'absolute',
-          bottom: 20,
-          right: 20,
+          bottom: { xs: 10, sm: 20 },
+          right: { xs: 10, sm: 20 },
           display: 'flex',
           gap: 1.2,
           background: 'rgba(15, 23, 42, 0.88)',
           backdropFilter: 'blur(12px)',
           borderRadius: 4,
-          p: 0.8,
+          p: { xs: 0.4, sm: 0.8 },
           border: '1px solid rgba(255, 255, 255, 0.12)',
           zIndex: 2,
         }}
       >
         {onHandToggle && (
           <Tooltip title={`Switch to ${selectedHand === 'right' ? 'Left' : 'Right'} Hand`}>
-            <IconButton onClick={onHandToggle} sx={{ color: '#E2E8F0' }}>
-              <PanToolIcon />
+            <IconButton onClick={onHandToggle} size='small' sx={{ color: '#E2E8F0' }}>
+              <PanToolIcon fontSize='small' />
             </IconButton>
           </Tooltip>
         )}
         <Tooltip title='Reset 3D View Angle'>
-          <IconButton onClick={resetRotation} sx={{ color: '#E2E8F0' }}>
-            <RotateRightIcon />
+          <IconButton onClick={resetRotation} size='small' sx={{ color: '#E2E8F0' }}>
+            <RotateRightIcon fontSize='small' />
           </IconButton>
         </Tooltip>
       </Box>
@@ -694,19 +703,19 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       <Box
         sx={{
           position: 'absolute',
-          bottom: 20,
-          left: 20,
-          maxWidth: '75%',
+          bottom: { xs: 10, sm: 20 },
+          left: { xs: 10, sm: 20 },
+          maxWidth: { xs: '65%', sm: '75%' },
           background: 'rgba(15, 23, 42, 0.88)',
           backdropFilter: 'blur(12px)',
-          px: 2.2,
-          py: 1.0,
+          px: { xs: 1.4, sm: 2.2 },
+          py: { xs: 0.6, sm: 1.0 },
           borderRadius: 3.5,
           border: '1px solid rgba(255, 255, 255, 0.12)',
           zIndex: 2,
         }}
       >
-        <Typography variant='caption' sx={{ color: '#DDD6FE', fontSize: '0.9rem', fontWeight: 600, display: 'block' }}>
+        <Typography variant='caption' sx={{ color: '#DDD6FE', fontSize: { xs: '0.78rem', sm: '0.9rem' }, fontWeight: 600, display: 'block' }}>
           💡 {letterInfo.description}
         </Typography>
       </Box>

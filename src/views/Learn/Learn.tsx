@@ -24,8 +24,9 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import ReplayIcon from '@mui/icons-material/Replay'
 import StarIcon from '@mui/icons-material/Star'
+import HomeIcon from '@mui/icons-material/Home'
 import confetti from 'canvas-confetti'
-
+import { useNavigate } from 'react-router-dom'
 import HandGuide3D from '../../components/HandGuide3D/HandGuide3D'
 import CameraView from '../../components/CameraView/CameraView'
 import WordSpeller from '../../components/WordSpeller/WordSpeller'
@@ -35,6 +36,7 @@ import audioEngine from '../../services/audioEngine'
 type LearnMode = 'words' | 'alphabet' | 'speed'
 
 export const Learn: React.FC = () => {
+  const navigate = useNavigate()
   const [selectedHand, setSelectedHand] = useState<'right' | 'left'>('right')
   const [mode, setMode] = useState<LearnMode>('words')
   const [isMuted, setIsMuted] = useState<boolean>(audioEngine.getMuted())
@@ -152,7 +154,7 @@ export const Learn: React.FC = () => {
     <Box
       sx={{
         width: '100vw',
-        height: 'calc(100vh - 72px)',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         p: { xs: 1, md: 1.5 },
@@ -209,7 +211,7 @@ export const Learn: React.FC = () => {
           <Tab label='⚡ Speed Rush' value='speed' />
         </Tabs>
 
-        {/* Center / Word / Alphabet Compact Helper */}
+        {/* Center / Word / Alphabet / Speed Compact Helper */}
         {mode === 'words' && (
           <Box sx={{ flex: 1, maxWidth: 500, mx: 1 }}>
             <WordSpeller
@@ -232,12 +234,15 @@ export const Learn: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               gap: 0.5,
-              background: 'rgba(15, 23, 42, 0.75)',
-              backdropFilter: 'blur(10px)',
+              background: 'rgba(17, 24, 39, 0.8)',
+              backdropFilter: 'blur(12px)',
               px: 1,
               py: 0.4,
-              borderRadius: 3,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              height: 46,
+              minHeight: 46,
+              boxSizing: 'border-box',
+              borderRadius: 3.5,
+              border: '1px solid rgba(255, 255, 255, 0.08)',
               overflowX: 'auto',
               maxWidth: { xs: '100%', md: '52%' },
             }}
@@ -248,7 +253,7 @@ export const Learn: React.FC = () => {
                 audioEngine.playPop()
                 setAlphabetIndex((prev) => (prev - 1 + GSL_ALPHABET.length) % GSL_ALPHABET.length)
               }}
-              sx={{ color: '#E2E8F0' }}
+              sx={{ color: '#E2E8F0', p: 0.4 }}
             >
               <ArrowBackIcon fontSize='small' />
             </IconButton>
@@ -285,7 +290,7 @@ export const Learn: React.FC = () => {
                 audioEngine.playPop()
                 setAlphabetIndex((prev) => (prev + 1) % GSL_ALPHABET.length)
               }}
-              sx={{ color: '#E2E8F0' }}
+              sx={{ color: '#E2E8F0', p: 0.4 }}
             >
               <ArrowForwardIcon fontSize='small' />
             </IconButton>
@@ -297,14 +302,17 @@ export const Learn: React.FC = () => {
             <Paper
               sx={{
                 flex: 1,
-                p: 0.8,
+                height: 46,
+                minHeight: 46,
+                boxSizing: 'border-box',
+                py: 0.4,
                 px: 1.5,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(245, 158, 11, 0.15) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
-                borderRadius: 3,
+                borderRadius: 3.5,
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -346,7 +354,7 @@ export const Learn: React.FC = () => {
         )}
 
         {/* User Status / Score & Accessibility Controls */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, height: 46, minHeight: 46 }}>
           {streak > 0 && (
             <Box
               sx={{
@@ -356,7 +364,7 @@ export const Learn: React.FC = () => {
                 background: 'rgba(245, 158, 11, 0.15)',
                 border: '1px solid rgba(245, 158, 11, 0.3)',
                 px: 1.2,
-                py: 0.3,
+                height: 38,
                 borderRadius: 2.5,
               }}
             >
@@ -376,7 +384,7 @@ export const Learn: React.FC = () => {
                 background: 'rgba(99, 102, 241, 0.2)',
                 border: '1px solid rgba(99, 102, 241, 0.4)',
                 px: 1.2,
-                py: 0.3,
+                height: 38,
                 borderRadius: 2.5,
               }}
             >
@@ -394,35 +402,50 @@ export const Learn: React.FC = () => {
               size='small'
               onClick={toggleHand}
               startIcon={<PanToolIcon fontSize='small' />}
-              sx={{ borderRadius: 2.5, textTransform: 'capitalize', minHeight: 34, py: 0.3 }}
+              sx={{ borderRadius: 2.5, textTransform: 'capitalize', height: 38 }}
             >
               {selectedHand}
             </Button>
           </Tooltip>
 
+          {/* Home Navigation */}
+          <Tooltip title='Return to Home Page'>
+            <IconButton
+              size='small'
+              onClick={() => {
+                audioEngine.playPop()
+                navigate('/')
+              }}
+              sx={{ color: '#E2E8F0', border: '1px solid rgba(255,255,255,0.1)', height: 38, width: 38 }}
+            >
+              <HomeIcon fontSize='small' />
+            </IconButton>
+          </Tooltip>
+
           {/* Audio Toggle */}
           <Tooltip title={isMuted ? 'Unmute Audio' : 'Mute Audio'}>
-            <IconButton size='small' onClick={handleMuteToggle} sx={{ color: '#E2E8F0', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <IconButton size='small' onClick={handleMuteToggle} sx={{ color: '#E2E8F0', border: '1px solid rgba(255,255,255,0.1)', height: 38, width: 38 }}>
               {isMuted ? <VolumeOffIcon fontSize='small' /> : <VolumeUpIcon fontSize='small' />}
             </IconButton>
           </Tooltip>
         </Box>
       </Box>
 
-      {/* Main Full-Screen Split View (Left 50% Hand Guide, Right 50% Camera Mirror) */}
+      {/* Main Full-Screen Split View (50% Hand Guide, 50% Camera Mirror Always) */}
       <Box
         sx={{
           flex: 1,
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
+          flexDirection: 'row',
           gap: 1.5,
           minHeight: 0,
+          overflow: 'hidden',
         }}
       >
         {/* Left Half (50% Width, 100% Height): Continuous 3D Animated Hand */}
-        <Box sx={{ flex: 1, height: '100%', minHeight: 0 }}>
+        <Box sx={{ flex: '1 1 50%', width: '50%', height: '100%', minWidth: 0, minHeight: 0 }}>
           <HandGuide3D
             currentLetter={activeTargetLetter.letter}
             selectedHand={selectedHand}
@@ -431,7 +454,7 @@ export const Learn: React.FC = () => {
         </Box>
 
         {/* Right Half (50% Width, 100% Height): Live Camera Feed */}
-        <Box sx={{ flex: 1, height: '100%', minHeight: 0 }}>
+        <Box sx={{ flex: '1 1 50%', width: '50%', height: '100%', minWidth: 0, minHeight: 0 }}>
           <CameraView
             selectedHand={selectedHand}
             targetLetter={activeTargetLetter.letter}

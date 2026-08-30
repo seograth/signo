@@ -252,7 +252,7 @@ export class GSLClassifier {
     const letterInfo = GSL_ALPHABET.find((l) => l.index === classIndex) || GSL_ALPHABET[0]
 
     const indexedProbs = smoothed.map((prob, idx) => ({
-      letter: GSL_ALPHABET[idx]?.letter || `?`,
+      letter: GSL_ALPHABET[idx]?.letter || '?',
       confidence: Math.round(prob * 100) / 100,
     }))
     indexedProbs.sort((a, b) => b.confidence - a.confidence)
