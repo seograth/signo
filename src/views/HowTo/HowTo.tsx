@@ -6,34 +6,36 @@ import PanToolIcon from '@mui/icons-material/PanTool'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export const HowTo: React.FC = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const steps = [
     {
       icon: <VideocamIcon sx={{ fontSize: 36, color: '#00B4D8' }} />,
-      step: 'Step 1',
-      title: 'Position Your Camera & Lighting',
-      desc: 'Allow browser webcam access and position your hand roughly 30-50cm from the camera. Ensure good ambient lighting without harsh backlights.',
+      step: t('howTo.step1Number'),
+      title: t('howTo.step1Title'),
+      desc: t('howTo.step1Desc'),
     },
     {
       icon: <PanToolIcon sx={{ fontSize: 36, color: '#FFB703' }} />,
-      step: 'Step 2',
-      title: 'Inspect the 3D Guide',
-      desc: 'Look at the 3D hand model demonstrating the target Greek letter. You can click and drag the 3D hand to rotate it and inspect finger bends from any angle.',
+      step: t('howTo.step2Number'),
+      title: t('howTo.step2Title'),
+      desc: t('howTo.step2Desc'),
     },
     {
       icon: <CheckCircleOutlineIcon sx={{ fontSize: 36, color: '#06D6A0' }} />,
-      step: 'Step 3',
-      title: 'Form & Hold the Sign',
-      desc: 'Mimic the hand shape with your hand. When your sign matches, the glowing green feedback and confidence ring will charge up for 0.8 seconds.',
+      step: t('howTo.step3Number'),
+      title: t('howTo.step3Title'),
+      desc: t('howTo.step3Desc'),
     },
     {
       icon: <EmojiEventsIcon sx={{ fontSize: 36, color: '#FF6B6B' }} />,
-      step: 'Step 4',
-      title: 'Complete Words & Build Streaks',
-      desc: 'Spell complete Greek words letter by letter to earn celebratory confetti, level up your vocabulary, or race the clock in 60s Speed Rush!',
+      step: t('howTo.step4Number'),
+      title: t('howTo.step4Title'),
+      desc: t('howTo.step4Desc'),
     },
   ]
 
@@ -42,10 +44,10 @@ export const HowTo: React.FC = () => {
       <Container maxWidth='lg'>
         <Box sx={{ textAlign: 'center', mb: 6 }}>
           <Typography variant='h2' sx={{ fontWeight: 800, mb: 1.5 }}>
-            How SigniFi Works
+            {t('howTo.title')}
           </Typography>
           <Typography variant='body1' sx={{ color: '#94A3B8', maxWidth: 600, mx: 'auto' }}>
-            A fast, beginner-friendly guide to learning the Greek Sign Language (ΕΝΓ) fingerspelling alphabet in minutes.
+            {t('howTo.subtitle')}
           </Typography>
         </Box>
 
@@ -92,10 +94,10 @@ export const HowTo: React.FC = () => {
           }}
         >
           <Typography variant='h5' sx={{ fontWeight: 800, mb: 1 }}>
-            Ready to test your signing skills?
+            {t('howTo.ctaTitle')}
           </Typography>
           <Typography variant='body2' sx={{ color: '#CBD5E1', mb: 2, maxWidth: 460, mx: 'auto' }}>
-            Jump right in and start practicing with the interactive 3D hand and real-time webcam feedback!
+            {t('howTo.ctaSubtitle')}
           </Typography>
           <Button
             variant='contained'
@@ -104,7 +106,7 @@ export const HowTo: React.FC = () => {
             onClick={() => navigate('/learn')}
             sx={{ px: 3, py: 1, fontWeight: 800, borderRadius: 3 }}
           >
-            Launch Practice Studio 🚀
+            {t('howTo.ctaBtn')}
           </Button>
         </Paper>
       </Container>
@@ -113,3 +115,4 @@ export const HowTo: React.FC = () => {
 }
 
 export default HowTo
+

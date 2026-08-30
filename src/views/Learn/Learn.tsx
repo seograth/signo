@@ -27,6 +27,7 @@ import StarIcon from '@mui/icons-material/Star'
 import HomeIcon from '@mui/icons-material/Home'
 import confetti from 'canvas-confetti'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import HandGuide3D from '../../components/HandGuide3D/HandGuide3D'
 import CameraView from '../../components/CameraView/CameraView'
 import WordSpeller from '../../components/WordSpeller/WordSpeller'
@@ -37,6 +38,7 @@ type LearnMode = 'words' | 'alphabet' | 'speed'
 
 export const Learn: React.FC = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [selectedHand, setSelectedHand] = useState<'right' | 'left'>('right')
   const [mode, setMode] = useState<LearnMode>('words')
   const [isMuted, setIsMuted] = useState<boolean>(audioEngine.getMuted())
@@ -211,9 +213,9 @@ export const Learn: React.FC = () => {
             },
           }}
         >
-          <Tab label='✨ Word Quest' value='words' />
-          <Tab label='🔤 Alphabet Explorer' value='alphabet' />
-          <Tab label='⚡ Speed Rush' value='speed' />
+          <Tab label={`✨ ${t('learn.wordQuest')}`} value='words' />
+          <Tab label={`🔤 ${t('learn.alphabetExplorer')}`} value='alphabet' />
+          <Tab label={`⚡ ${t('learn.speedRush')}`} value='speed' />
         </Tabs>
 
         {/* Center / Word / Alphabet / Speed Compact Helper */}
@@ -365,7 +367,7 @@ export const Learn: React.FC = () => {
                   onClick={startSpeedRush}
                   sx={{ borderRadius: 2.5, fontWeight: 800, py: 0.2, px: 1.5, fontSize: '0.78rem' }}
                 >
-                  {speedFinished ? 'Replay 🚀' : 'Start ⚡'}
+                  {speedFinished ? t('learn.playAgain') : 'Start ⚡'}
                 </Button>
               )}
             </Paper>
@@ -415,7 +417,7 @@ export const Learn: React.FC = () => {
           )}
 
           {/* Hand Toggle */}
-          <Tooltip title={`Signing with ${selectedHand === 'right' ? 'Right' : 'Left'} Hand (Click to switch)`}>
+          <Tooltip title={`Signing with ${selectedHand === 'right' ? t('learn.rightHand') : t('learn.leftHand')}`}>
             <Button
               variant='outlined'
               size='small'
@@ -423,7 +425,7 @@ export const Learn: React.FC = () => {
               startIcon={<PanToolIcon fontSize='small' />}
               sx={{ borderRadius: 2.5, textTransform: 'capitalize', height: 38 }}
             >
-              {selectedHand}
+              {selectedHand === 'right' ? t('learn.rightHand') : t('learn.leftHand')}
             </Button>
           </Tooltip>
 
@@ -442,7 +444,7 @@ export const Learn: React.FC = () => {
           </Tooltip>
 
           {/* Audio Toggle */}
-          <Tooltip title={isMuted ? 'Unmute Audio' : 'Mute Audio'}>
+          <Tooltip title={isMuted ? t('learn.soundMuted') : t('learn.soundOn')}>
             <IconButton size='small' onClick={handleMuteToggle} sx={{ color: '#E2E8F0', border: '1px solid rgba(255,255,255,0.1)', height: 38, width: 38 }}>
               {isMuted ? <VolumeOffIcon fontSize='small' /> : <VolumeUpIcon fontSize='small' />}
             </IconButton>
@@ -501,7 +503,7 @@ export const Learn: React.FC = () => {
         <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
           <EmojiEventsIcon sx={{ fontSize: 56, color: '#FBBF24', mb: 1 }} />
           <Typography variant='h5' sx={{ fontWeight: 800, color: '#FFFFFF' }}>
-            Speed Rush Complete! ⚡
+            {t('learn.speedCompleteTitle')}
           </Typography>
         </DialogTitle>
 
@@ -509,7 +511,7 @@ export const Learn: React.FC = () => {
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, my: 2 }}>
             <Paper sx={{ p: 2, background: 'rgba(255, 255, 255, 0.05)', borderRadius: 3 }}>
               <Typography variant='caption' sx={{ color: '#94A3B8' }}>
-                Final Score
+                {t('learn.score')}
               </Typography>
               <Typography variant='h4' sx={{ fontWeight: 900, color: '#FBBF24' }}>
                 {score}
@@ -518,7 +520,7 @@ export const Learn: React.FC = () => {
 
             <Paper sx={{ p: 2, background: 'rgba(255, 255, 255, 0.05)', borderRadius: 3 }}>
               <Typography variant='caption' sx={{ color: '#94A3B8' }}>
-                Letters Signed
+                {t('learn.lettersCompleted')}
               </Typography>
               <Typography variant='h4' sx={{ fontWeight: 900, color: '#10B981' }}>
                 {lettersCompletedCount}
@@ -545,7 +547,7 @@ export const Learn: React.FC = () => {
             }}
             sx={{ borderRadius: 3 }}
           >
-            Word Quest
+            {t('learn.wordQuest')}
           </Button>
           <Button
             variant='contained'
@@ -554,7 +556,7 @@ export const Learn: React.FC = () => {
             onClick={startSpeedRush}
             sx={{ borderRadius: 3, fontWeight: 800, px: 3 }}
           >
-            Play Again 🚀
+            {t('learn.playAgain')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -563,3 +565,4 @@ export const Learn: React.FC = () => {
 }
 
 export default Learn
+

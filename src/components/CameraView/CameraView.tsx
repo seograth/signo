@@ -6,6 +6,7 @@ import FlipCameraIosIcon from '@mui/icons-material/FlipCameraIos'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import RefreshIcon from '@mui/icons-material/Refresh'
+import { useTranslation } from 'react-i18next'
 import { Landmark3D, PredictionResult, gslClassifier } from '../../services/gslClassifier'
 import audioEngine from '../../services/audioEngine'
 import useClassifierWorker from '../../hooks/useClassifierWorker'
@@ -35,6 +36,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
   targetLetter,
   isPaused = false,
 }) => {
+  const { t } = useTranslation()
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [cameraActive, setCameraActive] = useState<boolean>(true)
@@ -419,7 +421,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
         <Box sx={{ textAlign: 'center', p: 3, zIndex: 2 }}>
           <VideocamOffIcon sx={{ fontSize: 48, color: '#94A3B8', mb: 1 }} />
           <Typography variant='body1' sx={{ color: '#FFFFFF', fontWeight: 600 }}>
-            Camera is paused
+            {t('camera.paused')}
           </Typography>
           <Button
             variant='contained'
@@ -428,7 +430,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
             onClick={toggleCamera}
             sx={{ mt: 2 }}
           >
-            Turn On Camera
+            {t('camera.turnOn')}
           </Button>
         </Box>
       )}
@@ -451,10 +453,10 @@ export const CameraView: React.FC<CameraViewProps> = ({
         >
           <WarningAmberIcon sx={{ fontSize: 44, color: '#FFB703', mb: 1 }} />
           <Typography variant='h6' sx={{ color: '#FFFFFF', fontWeight: 700 }}>
-            Camera Access Needed
+            {t('camera.accessNeeded')}
           </Typography>
           <Typography variant='body2' sx={{ color: '#94A3B8', maxWidth: 360, mt: 0.5, mb: 2 }}>
-            Please click the lock/camera icon in your address bar to allow camera access for SigniFi.
+            {t('camera.permissionDesc')}
           </Typography>
           <Button
             variant='contained'
@@ -464,7 +466,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
             onClick={() => initWebcam()}
             sx={{ borderRadius: 3, fontWeight: 700 }}
           >
-            Retry Camera
+            {t('camera.retry')}
           </Button>
         </Box>
       )}
@@ -507,14 +509,14 @@ export const CameraView: React.FC<CameraViewProps> = ({
             />
             <Typography variant='caption' sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: { xs: '0.8rem', sm: '0.95rem' } }}>
               {isCoolingDown
-                ? `Next: ${targetLetter || ''}`
+                ? t('camera.next', { letter: targetLetter || '' })
                 : isHandInView
                 ? detectedLetter
                   ? isMatch
-                    ? `Matched: ${detectedLetter} ✨`
-                    : `Detected: ${detectedLetter} (${Math.round(currentConfidence * 100)}%)`
-                  : 'Hand Tracked'
-                : 'Looking for hand...'}
+                    ? t('camera.matched', { letter: detectedLetter })
+                    : t('camera.detected', { letter: detectedLetter, confidence: Math.round(currentConfidence * 100) })
+                  : t('camera.handTracked')
+                : t('camera.lookingForHand')}
             </Typography>
           </Box>
 
@@ -541,13 +543,13 @@ export const CameraView: React.FC<CameraViewProps> = ({
               }}
             />
             <Typography variant='caption' sx={{ color: '#A7F3D0', fontSize: '0.75rem', fontWeight: 700, display: 'block', textAlign: 'right', mt: 0.4 }}>
-              Hold steady: {Math.round(holdProgress)}%
+              {t('camera.holdSteady', { progress: Math.round(holdProgress) })}
             </Typography>
           </Box>
         ) : (
           targetLetter && (
             <Typography variant='caption' sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
-              Target: <strong style={{ color: '#FFB703' }}>{targetLetter}</strong>
+              {t('camera.target')} <strong style={{ color: '#FFB703' }}>{targetLetter}</strong>
             </Typography>
           )
         )}
@@ -569,17 +571,17 @@ export const CameraView: React.FC<CameraViewProps> = ({
           zIndex: 2,
         }}
       >
-        <Tooltip title={cameraActive ? 'Turn Camera Off' : 'Turn Camera On'}>
+        <Tooltip title={cameraActive ? t('camera.turnOff') : t('camera.turnOn')}>
           <IconButton onClick={toggleCamera} size='small' sx={{ color: '#E2E8F0' }}>
             {cameraActive ? <VideocamIcon fontSize='small' /> : <VideocamOffIcon fontSize='small' />}
           </IconButton>
         </Tooltip>
-        <Tooltip title='Flip Camera'>
+        <Tooltip title={t('camera.flipCamera')}>
           <IconButton onClick={toggleFacingMode} size='small' sx={{ color: '#E2E8F0' }}>
             <FlipCameraIosIcon fontSize='small' />
           </IconButton>
         </Tooltip>
-        <Tooltip title='Reload Camera Stream'>
+        <Tooltip title={t('camera.reloadStream')}>
           <IconButton onClick={() => initWebcam()} size='small' sx={{ color: '#E2E8F0' }}>
             <RefreshIcon fontSize='small' />
           </IconButton>

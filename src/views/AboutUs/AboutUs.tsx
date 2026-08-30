@@ -5,16 +5,18 @@ import FavoriteIcon from '@mui/icons-material/Favorite'
 import SchoolIcon from '@mui/icons-material/School'
 import CodeIcon from '@mui/icons-material/Code'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export const AboutUs: React.FC = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   return (
     <Box sx={{ minHeight: '100%', py: { xs: 4, md: 6 } }}>
       <Container maxWidth='lg'>
         <Box sx={{ textAlign: 'center', mb: 6 }}>
           <Typography variant='h2' sx={{ fontWeight: 800, mb: 1.5 }}>
-            About SigniFi
+            {t('aboutUs.title')}
           </Typography>
           <Typography
             variant='body1'
@@ -25,10 +27,10 @@ export const AboutUs: React.FC = () => {
               mb: 2,
             }}
           >
-            Connect Beyond Words • Ελληνική Νοηματική Γλώσσα (ΕΝΓ)
+            {t('aboutUs.tagline')}
           </Typography>
           <Typography variant='body1' sx={{ color: '#94A3B8', maxWidth: 700, mx: 'auto', lineHeight: 1.7 }}>
-            SigniFi was founded to break communication barriers between the hearing and Deaf & Hard of Hearing communities in Greece. By transforming traditional static finger charts into interactive, AI-guided games, learning Greek Sign Language becomes intuitive, engaging, and enjoyable for everyone.
+            {t('aboutUs.description')}
           </Typography>
         </Box>
 
@@ -45,10 +47,10 @@ export const AboutUs: React.FC = () => {
             >
               <FavoriteIcon sx={{ fontSize: 40, color: '#FF6B6B', mb: 2 }} />
               <Typography variant='h5' sx={{ fontWeight: 700, mb: 1.5 }}>
-                Social Inclusion
+                {t('aboutUs.card1Title')}
               </Typography>
               <Typography variant='body2' sx={{ color: '#94A3B8', lineHeight: 1.7 }}>
-                Fostering empathy and practical signing skills for families, educators, healthcare professionals, and anyone passionate about inclusive communication.
+                {t('aboutUs.card1Desc')}
               </Typography>
             </Paper>
           </Grid>
@@ -65,10 +67,10 @@ export const AboutUs: React.FC = () => {
             >
               <SchoolIcon sx={{ fontSize: 40, color: '#FFB703', mb: 2 }} />
               <Typography variant='h5' sx={{ fontWeight: 700, mb: 1.5 }}>
-                Greek Sign Language (ΕΝΓ)
+                {t('aboutUs.card2Title')}
               </Typography>
               <Typography variant='body2' sx={{ color: '#94A3B8', lineHeight: 1.7 }}>
-                Greek Sign Language possesses a rich, unique linguistic structure. Fingerspelling (δακτυλικό αλφάβητο) is the essential gateway for spelling names, acronyms, and specialized terms.
+                {t('aboutUs.card2Desc')}
               </Typography>
             </Paper>
           </Grid>
@@ -85,10 +87,10 @@ export const AboutUs: React.FC = () => {
             >
               <CodeIcon sx={{ fontSize: 40, color: '#00B4D8', mb: 2 }} />
               <Typography variant='h5' sx={{ fontWeight: 700, mb: 1.5 }}>
-                Cutting-Edge Web AI
+                {t('aboutUs.card3Title')}
               </Typography>
               <Typography variant='body2' sx={{ color: '#94A3B8', lineHeight: 1.7 }}>
-                Powered by MediaPipe 3D hand tracking, WebGL Three.js skeletal rendering, and client-side neural network inference for 100% private, instant feedback.
+                {t('aboutUs.card3Desc')}
               </Typography>
             </Paper>
           </Grid>
@@ -102,7 +104,7 @@ export const AboutUs: React.FC = () => {
             onClick={() => navigate('/learn')}
             sx={{ px: 4, py: 1.5, fontWeight: 800, borderRadius: 3 }}
           >
-            Start Learning Greek Fingerspelling
+            {t('aboutUs.ctaBtn')}
           </Button>
         </Box>
       </Container>
@@ -111,3 +113,4 @@ export const AboutUs: React.FC = () => {
 }
 
 export default AboutUs
+

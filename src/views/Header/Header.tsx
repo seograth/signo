@@ -10,19 +10,30 @@ import Container from '@mui/material/Container'
 import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
+import TranslateIcon from '@mui/icons-material/Translate'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import audioEngine from '../../services/audioEngine'
-
-const pages = [
-  { label: 'Home', redirect: '/' },
-  { label: 'How It Works', redirect: '/how-to' },
-  { label: 'About Us', redirect: '/about-us' },
-]
 
 export const Header: React.FC = () => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
   const navigate = useNavigate()
   const location = useLocation()
+  const { t, i18n } = useTranslation()
+
+  const currentLanguage = i18n.language && i18n.language.startsWith('el') ? 'el' : 'en'
+
+  const toggleLanguage = () => {
+    const nextLang = currentLanguage === 'el' ? 'en' : 'el'
+    audioEngine.playPop()
+    i18n.changeLanguage(nextLang)
+  }
+
+  const pages = [
+    { label: t('nav.home'), redirect: '/' },
+    { label: t('nav.howTo'), redirect: '/how-to' },
+    { label: t('nav.aboutUs'), redirect: '/about-us' },
+  ]
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget)
@@ -76,12 +87,12 @@ export const Header: React.FC = () => {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              Signi<span style={{ color: '#00B4D8', WebkitTextFillColor: '#00B4D8' }}>Fi</span>
+              Sign<span style={{ color: '#00B4D8', WebkitTextFillColor: '#00B4D8' }}>o</span>
             </Typography>
           </Box>
 
-          {/* Mobile Menu Icon */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+          {/* Mobile Navigation controls */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
             <IconButton
               size='large'
               aria-label='navigation menu'
@@ -108,12 +119,13 @@ export const Header: React.FC = () => {
                   border: '1px solid rgba(255, 255, 255, 0.1)',
                   borderRadius: 3,
                   mt: 1,
+                  minWidth: 200,
                 },
               }}
             >
               {pages.map((page) => (
                 <MenuItem
-                  key={page.label}
+                  key={page.redirect}
                   onClick={() => {
                     audioEngine.playPop()
                     navigate(page.redirect)
@@ -142,7 +154,25 @@ export const Header: React.FC = () => {
                   py: 1.2,
                 }}
               >
-                <Typography sx={{ fontWeight: 800 }}>Start Practice 🚀</Typography>
+                <Typography sx={{ fontWeight: 800 }}>{t('nav.startNow')} 🚀</Typography>
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  toggleLanguage()
+                  handleCloseNavMenu()
+                }}
+                sx={{
+                  color: '#FFB703',
+                  fontWeight: 700,
+                  px: 3,
+                  py: 1.2,
+                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                }}
+              >
+                <TranslateIcon sx={{ fontSize: 20, mr: 1, color: '#FFB703' }} />
+                <Typography sx={{ fontWeight: 700 }}>
+                  {currentLanguage === 'el' ? 'English (EN)' : 'Ελληνικά (ΕΛ)'}
+                </Typography>
               </MenuItem>
             </Menu>
           </Box>
@@ -168,17 +198,17 @@ export const Header: React.FC = () => {
                 color: '#FFFFFF',
               }}
             >
-              Signi<span style={{ color: '#00B4D8' }}>Fi</span>
+              Sign<span style={{ color: '#00B4D8' }}>o</span>
             </Typography>
           </Box>
 
-          {/* Desktop Navigation Links */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+          {/* Desktop Navigation Links & Language Toggle */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1.2 }}>
             {pages.map((page) => {
               const isActive = location.pathname === page.redirect
               return (
                 <Button
-                  key={page.label}
+                  key={page.redirect}
                   onClick={() => {
                     audioEngine.playPop()
                     navigate(page.redirect)
@@ -210,10 +240,86 @@ export const Header: React.FC = () => {
                 audioEngine.playPop()
                 navigate('/learn')
               }}
-              sx={{ ml: 1.5, px: 2.5, py: 0.8, fontWeight: 800, borderRadius: 3 }}
+              sx={{ ml: 1, px: 2.5, py: 0.8, fontWeight: 800, borderRadius: 3 }}
             >
-              Start Practice
+              {t('nav.startNow')}
             </Button>
+
+            {/* Language Toggle Control Pill */}
+            <Box
+              onClick={toggleLanguage}
+              sx={{
+                ml: 1.5,
+                display: 'flex',
+                alignItems: 'center',
+                background: 'rgba(34, 38, 52, 0.9)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: 4,
+                p: '3px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  borderColor: '#00B4D8',
+                  boxShadow: '0 0 12px rgba(0, 180, 216, 0.3)',
+                },
+              }}
+              title={t('common.toggleLanguage')}
+            >
+              <Box
+                sx={{
+                  px: 1.2,
+                  py: 0.4,
+                  borderRadius: 3,
+                  fontSize: '0.82rem',
+                  fontWeight: 800,
+                  color: currentLanguage === 'en' ? '#FFFFFF' : '#94A3B8',
+                  background: currentLanguage === 'en' ? 'linear-gradient(135deg, #00B4D8 0%, #0077B6 100%)' : 'transparent',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                }}
+              >
+                <span>🇬🇧</span> EN
+              </Box>
+              <Box
+                sx={{
+                  px: 1.2,
+                  py: 0.4,
+                  borderRadius: 3,
+                  fontSize: '0.82rem',
+                  fontWeight: 800,
+                  color: currentLanguage === 'el' ? '#FFFFFF' : '#94A3B8',
+                  background: currentLanguage === 'el' ? 'linear-gradient(135deg, #00B4D8 0%, #0077B6 100%)' : 'transparent',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                }}
+              >
+                <span>🇬🇷</span> ΕΛ
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Mobile Language Toggle Button (Visible next to logo on mobile) */}
+          <Box
+            onClick={toggleLanguage}
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              alignItems: 'center',
+              gap: 0.5,
+              background: 'rgba(34, 38, 52, 0.9)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: 4,
+              px: 1.4,
+              py: 0.5,
+              cursor: 'pointer',
+            }}
+          >
+            <Typography variant='caption' sx={{ fontWeight: 800, color: '#00B4D8' }}>
+              {currentLanguage === 'el' ? '🇬🇷 ΕΛ' : '🇬🇧 EN'}
+            </Typography>
           </Box>
         </Toolbar>
       </Container>
@@ -222,3 +328,4 @@ export const Header: React.FC = () => {
 }
 
 export default Header
+

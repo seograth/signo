@@ -1,4 +1,4 @@
-# SigniFi 🤟
+# Signo 🤟
 
 > **Master Greek Sign Language (ΕΝΓ) Letter by Letter with Real-Time AI Feedback.**
 
@@ -9,9 +9,9 @@
 
 ## 📋 Overview
 
-**SigniFi** is an open-source, interactive sign language learning platform—often described as "Duolingo for Sign Language". Specifically engineered for **Greek Sign Language (Ελληνική Νοηματική Γλώσσα - ΕΝΓ)**, SigniFi transforms static fingerspelling charts into immersive, real-time feedback loops.
+**Signo** is an open-source, interactive sign language learning platform—often described as "Duolingo for Sign Language". Specifically engineered for **Greek Sign Language (Ελληνική Νοηματική Γλώσσα - ΕΝΓ)**, Signo transforms static fingerspelling charts into immersive, real-time feedback loops.
 
-By pairing **MediaPipe 3D Hand Tracking** and **TensorFlow.js** neural classification with a **Three.js procedural 3D hand guide**, SigniFi evaluates user hand gestures directly in the browser—with **zero server latency** and **100% video privacy**.
+By pairing **MediaPipe 3D Hand Tracking** and **TensorFlow.js** neural classification with a **Three.js procedural 3D hand guide**, Signo evaluates user hand gestures directly in the browser—with **zero server latency** and **100% video privacy**.
 
 ---
 
@@ -30,7 +30,7 @@ By pairing **MediaPipe 3D Hand Tracking** and **TensorFlow.js** neural classific
 
 ## 🎨 Design System & Accessibility Architecture
 
-Computer vision pose estimation requires robust visual isolation between the user's hand landmarks and background environments. SigniFi enforces a specialized design system optimized for skin-tone separation, lighting variance, and non-auditory feedback.
+Computer vision pose estimation requires robust visual isolation between the user's hand landmarks and background environments. Signo enforces a specialized design system optimized for skin-tone separation, lighting variance, and non-auditory feedback.
 
 ### Contrast & Video Isolation
 Camera feeds and 3D avatar viewports persistently enforce **Deep Slate Navy (`#1A1D28`)** backgrounds with darkened webcam contrast filters (`brightness(0.50)` / `contrast(1.20)`). This ensures high contrast for hand landmark vectors regardless of ambient lighting or user skin tone.
@@ -119,7 +119,7 @@ Ensure you have the following installed on your environment:
 
 ## 🧪 Testing, Quality & Linting
 
-SigniFi maintains strict code hygiene and formatting standards:
+Signo maintains strict code hygiene and formatting standards:
 
 ```bash
 # Run TypeScript compilation check
@@ -134,4 +134,5 @@ npm run format
 # Run Stylelint on CSS files
 npx stylelint "src/**/*.css"
 ```
+
 

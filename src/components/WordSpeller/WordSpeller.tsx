@@ -4,6 +4,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import SkipNextIcon from '@mui/icons-material/SkipNext'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { GslWord } from '../../services/gslDictionary'
 
 interface WordSpellerProps {
@@ -22,6 +23,11 @@ export const WordSpeller: React.FC<WordSpellerProps> = ({
   onToggleHint,
 }) => {
   const letters = currentWord.word.split('')
+  const { i18n } = useTranslation()
+  const isGreek = i18n.language && i18n.language.startsWith('el')
+
+  const primaryTranslation = isGreek ? currentWord.translationEl : currentWord.translationEn
+  const secondaryTranslation = isGreek ? currentWord.translationEn : currentWord.translationEl
 
   return (
     <Box
@@ -47,12 +53,13 @@ export const WordSpeller: React.FC<WordSpellerProps> = ({
           {currentWord.emoji}
         </Typography>
         <Typography variant='subtitle2' sx={{ fontWeight: 800, color: '#FFFFFF', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
-          {currentWord.translationEl}
+          {primaryTranslation}
         </Typography>
         <Typography variant='caption' sx={{ color: '#94A3B8', fontSize: '0.75rem', display: { xs: 'none', md: 'inline' } }}>
-          ({currentWord.translationEn})
+          ({secondaryTranslation})
         </Typography>
       </Box>
+
 
       {/* Inline Letter Chips (32px height matching Alphabet Explorer chips) */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, overflowX: 'auto', py: 0.2 }}>

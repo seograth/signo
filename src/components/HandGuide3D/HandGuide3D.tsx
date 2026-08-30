@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { Box, Typography, IconButton, Tooltip } from '@mui/material'
 import RotateRightIcon from '@mui/icons-material/RotateRight'
 import PanToolIcon from '@mui/icons-material/PanTool'
+import { useTranslation } from 'react-i18next'
 import gslTemplates from '../../assets/gsl_landmark_templates.json'
 import { GSL_ALPHABET, GslLetter, LETTER_TO_INDEX } from '../../services/gslDictionary'
 
@@ -123,8 +124,14 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
     y: ['Μ', 'Ν'].includes(normLetter) ? 0 : Math.PI,
   })
 
+  const { i18n } = useTranslation()
+  const isGreek = i18n.language && i18n.language.startsWith('el')
+
   const letterInfo: GslLetter =
     GSL_ALPHABET.find((l) => l.letter === normLetter || l.letter === currentLetter) || GSL_ALPHABET[0]
+
+  const letterDisplayName = isGreek ? letterInfo.name : letterInfo.enName
+  const letterTip = isGreek ? letterInfo.description : letterInfo.fingersTip
 
   const activeTemplateRef = useRef<number[][]>(getLetterLandmarks(currentLetter))
 
@@ -662,10 +669,10 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
         }}
       >
         <Typography variant='subtitle1' sx={{ color: '#00B4D8', fontWeight: 900, fontSize: { xs: '0.95rem', sm: '1.2rem' } }}>
-          {letterInfo.letter} ({letterInfo.name})
+          {letterInfo.letter} ({letterDisplayName})
         </Typography>
         <Typography variant='caption' sx={{ color: '#FFB703', fontWeight: 700, fontSize: { xs: '0.75rem', sm: '0.85rem' } }}>
-          • {selectedHand === 'right' ? 'Right Hand 🤚' : 'Left Hand ✋'}
+          • {selectedHand === 'right' ? (isGreek ? 'Δεξί Χέρι 🤚' : 'Right Hand 🤚') : (isGreek ? 'Αριστερό Χέρι ✋' : 'Left Hand ✋')}
         </Typography>
       </Box>
 
@@ -686,13 +693,13 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
         }}
       >
         {onHandToggle && (
-          <Tooltip title={`Switch to ${selectedHand === 'right' ? 'Left' : 'Right'} Hand`}>
+          <Tooltip title={isGreek ? `Αλλαγή σε ${selectedHand === 'right' ? 'Αριστερό' : 'Δεξί'} Χέρι` : `Switch to ${selectedHand === 'right' ? 'Left' : 'Right'} Hand`}>
             <IconButton onClick={onHandToggle} size='small' sx={{ color: '#E2E8F0' }}>
               <PanToolIcon fontSize='small' />
             </IconButton>
           </Tooltip>
         )}
-        <Tooltip title='Reset 3D View Angle'>
+        <Tooltip title={isGreek ? 'Επαναφορά Γωνίας Προβολής' : 'Reset 3D View Angle'}>
           <IconButton onClick={resetRotation} size='small' sx={{ color: '#E2E8F0' }}>
             <RotateRightIcon fontSize='small' />
           </IconButton>
@@ -716,7 +723,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
         }}
       >
         <Typography variant='caption' sx={{ color: '#E2E8F0', fontSize: { xs: '0.78rem', sm: '0.9rem' }, fontWeight: 600, display: 'block' }}>
-          💡 {letterInfo.description}
+          💡 {letterTip}
         </Typography>
       </Box>
     </Box>

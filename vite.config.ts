@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mediapipe/*'],
         manifest: {
-          name: 'SigniFi - Greek Sign Language Learning AI',
-          short_name: 'SigniFi',
+          name: 'Signo - Greek Sign Language Learning AI',
+          short_name: 'Signo',
           description: 'Learn Greek Sign Language (ΕΝΓ) fingerspelling with real-time AI computer vision feedback',
           theme_color: '#1A1D28',
           background_color: '#1A1D28',
@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
           ],
         },
         workbox: {
+          maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm,data,tflite,json}'],
           runtimeCaching: [
             {
@@ -55,6 +56,9 @@ export default defineConfig(({ mode }) => {
     server: {
       open: true,
       port: 3000,
+    },
+    worker: {
+      format: 'es',
     },
     build: {
       outDir: './build',

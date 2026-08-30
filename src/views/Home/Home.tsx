@@ -7,12 +7,14 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import SecurityIcon from '@mui/icons-material/Security'
 import SpeedIcon from '@mui/icons-material/Speed'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import HandGuide3D from '../../components/HandGuide3D/HandGuide3D'
 import { GSL_ALPHABET } from '../../services/gslDictionary'
 
 export const Home: React.FC = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [demoLetter, setDemoLetter] = useState<string>('Α')
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export const Home: React.FC = () => {
               >
                 <AutoAwesomeIcon sx={{ color: '#00B4D8', fontSize: 18 }} />
                 <Typography variant='caption' sx={{ color: '#48CAE4', fontWeight: 800 }}>
-                  Greek Sign Language (ΕΝΓ) Fingerspelling AI
+                  {t('home.badge')}
                 </Typography>
               </Box>
 
@@ -68,7 +70,7 @@ export const Home: React.FC = () => {
                   WebkitTextFillColor: 'transparent',
                 }}
               >
-                Learn Sign Language, <br />
+                {t('home.heroHeadline')} <br />
                 <span
                   style={{
                     background: 'linear-gradient(135deg, #00B4D8 0%, #48CAE4 100%)',
@@ -76,7 +78,7 @@ export const Home: React.FC = () => {
                     WebkitTextFillColor: 'transparent',
                   }}
                 >
-                  Letter by Letter.
+                  {t('home.heroHeadlineSpan')}
                 </span>
               </Typography>
 
@@ -89,7 +91,7 @@ export const Home: React.FC = () => {
                   lineHeight: 1.6,
                 }}
               >
-                Practice the 24 letters of the Greek Fingerspelling Alphabet with instant, real-time AI feedback through your webcam. Interactive, gamified, and 100% private in your browser.
+                {t('home.heroSubheadline')}
               </Typography>
 
               {/* Action Buttons */}
@@ -108,7 +110,7 @@ export const Home: React.FC = () => {
                     borderRadius: 4,
                   }}
                 >
-                  Start Practicing Now
+                  {t('home.startNow')}
                 </Button>
                 <Button
                   variant='outlined'
@@ -122,7 +124,7 @@ export const Home: React.FC = () => {
                     borderRadius: 4,
                   }}
                 >
-                  How It Works
+                  {t('home.howItWorks')}
                 </Button>
               </Box>
             </motion.div>
@@ -170,10 +172,10 @@ export const Home: React.FC = () => {
         {/* Feature Highlights Grid */}
         <Box sx={{ mt: { xs: 8, md: 14 } }}>
           <Typography variant='h3' textAlign='center' sx={{ fontWeight: 800, mb: 1 }}>
-            Engineered for Interactive Fluency
+            {t('home.engineeredTitle')}
           </Typography>
           <Typography variant='body1' textAlign='center' sx={{ color: '#94A3B8', mb: 6 }}>
-            Inspired by cutting-edge computer vision and game-based learning mechanics.
+            {t('home.engineeredSubtitle')}
           </Typography>
 
           <Grid container spacing={3}>
@@ -211,10 +213,10 @@ export const Home: React.FC = () => {
                   <AutoAwesomeIcon />
                 </Box>
                 <Typography variant='h5' sx={{ fontWeight: 700, mb: 1 }}>
-                  Real-Time Hand Tracking
+                  {t('home.feature1Title')}
                 </Typography>
                 <Typography variant='body2' sx={{ color: '#94A3B8', lineHeight: 1.6 }}>
-                  Extracts 21 3D geometric landmarks and runs client-side neural network classification with zero latency.
+                  {t('home.feature1Desc')}
                 </Typography>
               </Paper>
             </Grid>
@@ -253,10 +255,10 @@ export const Home: React.FC = () => {
                   <SpeedIcon />
                 </Box>
                 <Typography variant='h5' sx={{ fontWeight: 700, mb: 1 }}>
-                  Gamified Word Quests
+                  {t('home.feature2Title')}
                 </Typography>
                 <Typography variant='body2' sx={{ color: '#94A3B8', lineHeight: 1.6 }}>
-                  Spell curated Greek words (Level 1 to 3) with satisfying hold timers, celebratory confetti, and combo streaks.
+                  {t('home.feature2Desc')}
                 </Typography>
               </Paper>
             </Grid>
@@ -295,10 +297,10 @@ export const Home: React.FC = () => {
                   <SecurityIcon />
                 </Box>
                 <Typography variant='h5' sx={{ fontWeight: 700, mb: 1 }}>
-                  100% Client-Side Privacy
+                  {t('home.feature3Title')}
                 </Typography>
                 <Typography variant='body2' sx={{ color: '#94A3B8', lineHeight: 1.6 }}>
-                  Your camera stream never leaves your device. All computer vision and AI models run locally inside your browser.
+                  {t('home.feature3Desc')}
                 </Typography>
               </Paper>
             </Grid>
@@ -310,3 +312,4 @@ export const Home: React.FC = () => {
 }
 
 export default Home
+

@@ -29,7 +29,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
+.antigravity/*
 
 # misc
 .DS_Store
