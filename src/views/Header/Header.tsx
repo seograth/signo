@@ -9,11 +9,11 @@ import MenuIcon from '@mui/icons-material/Menu'
 import Container from '@mui/material/Container'
 import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import TranslateIcon from '@mui/icons-material/Translate'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'  
 import audioEngine from '../../services/audioEngine'
+import ChameleonIcon from '../../components/icons/ChameleonIcon'
 
 export const Header: React.FC = () => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null)
@@ -61,21 +61,17 @@ export const Header: React.FC = () => {
               textDecoration: 'none',
             }}
           >
-            <Box
+            <ChameleonIcon
               sx={{
-                width: 38,
-                height: 38,
-                borderRadius: 2.5,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, #00B4D8 0%, #0077B6 100%)',
-                color: '#FFFFFF',
-                boxShadow: '0 4px 12px rgba(0, 180, 216, 0.35)',
+                fontSize: 36,
+                color: '#00B4D8',
+                filter: 'drop-shadow(0 4px 12px rgba(0, 180, 216, 0.45))',
+                transition: 'transform 0.2s ease',
+                '&:hover': {
+                  transform: 'scale(1.08)',
+                },
               }}
-            >
-              <AutoAwesomeIcon sx={{ fontSize: 22 }} />
-            </Box>
+            />
             <Typography
               variant='h5'
               noWrap
@@ -190,6 +186,13 @@ export const Header: React.FC = () => {
               cursor: 'pointer',
             }}
           >
+            <ChameleonIcon
+              sx={{
+                fontSize: 28,
+                color: '#00B4D8',
+                filter: 'drop-shadow(0 2px 8px rgba(0, 180, 216, 0.4))',
+              }}
+            />
             <Typography
               variant='h6'
               noWrap
