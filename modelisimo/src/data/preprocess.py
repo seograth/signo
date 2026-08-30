@@ -1,29 +1,34 @@
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
+def normalize_hand_landmarks(landmarks):
+    """
+    Normalizes 21 3D hand landmarks (63 values) to be translation and scale invariant:
+    1. Origin centered at the wrist (landmark 0).
+    2. Scale normalized by the distance between wrist (0) and middle finger MCP (9).
+    """
+    pts = np.array(landmarks, dtype=np.float32).reshape(-1, 3)
+    wrist = pts[0, :].copy()
+    pts_centered = pts - wrist
+    
+    # Scale reference: distance between wrist (0) and middle MCP (9)
+    scale = np.linalg.norm(pts_centered[9])
+    if scale > 1e-6:
+        pts_normalized = pts_centered / scale
+    else:
+        max_dist = np.max(np.linalg.norm(pts_centered, axis=1))
+        pts_normalized = pts_centered / (max_dist if max_dist > 1e-6 else 1.0)
+        
+    return pts_normalized.flatten()
+
 def preprocess_data(X, y):
     """
-    Preprocess the dataset by normalizing X and encoding y.
-
-    Parameters:
-        X: np.ndarray
-            Array of hand landmarks (features).
-        y: list or np.ndarray
-            List of labels corresponding to the gestures.
-
-    Returns:
-        X_normalized: np.ndarray
-            Normalized landmarks.
-        y_one_hot: np.ndarray
-            One-hot encoded labels.
-        label_encoder: LabelEncoder
-            Encoder for transforming labels.
+    Preprocess the dataset by normalizing X using coordinate-relative scaling and encoding y.
     """
-    # Ensure X contains numeric values
-    X = np.asarray(X, dtype=np.float32)  # Convert X to a NumPy array of type float
-    
-    # Normalize landmark coordinates
-    X_normalized = X / np.max(np.abs(X), axis=0)  # Normalize each column independently
+    X = np.asarray(X, dtype=np.float32)
+    X_normalized = np.zeros_like(X)
+    for i in range(len(X)):
+        X_normalized[i] = normalize_hand_landmarks(X[i])
 
     # Encode labels
     label_encoder = LabelEncoder()
@@ -32,26 +37,19 @@ def preprocess_data(X, y):
 
     return X_normalized, y_one_hot, label_encoder
 
-def augment_data(X):
+def augment_data(X, y=None):
     """
-    Augment the dataset by adding noise and flipping landmarks.
-
-    Parameters:
-        X: np.ndarray
-            Array of hand landmarks.
-
-    Returns:
-        X_augmented: np.ndarray
-            Augmented dataset.
+    Augment the dataset by adding subtle jitter noise and slight rotational variance.
+    Only applied to training partition to avoid data leakage.
     """
-    # Add small random noise to the landmarks
-    noise = np.random.normal(0, 0.01, X.shape)
+    noise = np.random.normal(0, 0.015, X.shape)
     X_noisy = X + noise
 
-    # Flip landmarks horizontally (assuming normalized X in range [0, 1])
-    X_flipped = X.copy()
-    X_flipped[:, ::3] = 1 - X_flipped[:, ::3]  # Flip x-coordinates
-
-    # Combine original, noisy, and flipped data
-    X_augmented = np.vstack((X, X_noisy, X_flipped))
+    # Combine original and jittered data
+    X_augmented = np.vstack((X, X_noisy))
+    
+    if y is not None:
+        y_augmented = np.vstack((y, y))
+        return X_augmented, y_augmented
+        
     return X_augmented

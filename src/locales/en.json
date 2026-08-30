@@ -1,24 +1,32 @@
 {
   "translation": {
+    "nav": {
+      "practice": "Practice Studio",
+      "howTo": "How It Works",
+      "aboutUs": "About Us",
+      "startNow": "Start Practice"
+    },
     "home": {
       "title": "SigniFi",
       "subtitle": "Connect Beyond Words",
-      "entryText": "A structured, leveled learning pathway that guides users from beginner to advanced sign language proficiency.",
-      "startNow": "Start now!"
+      "heroHeadline": "Learn Sign Language, Letter by Letter.",
+      "heroSubheadline": "Practice the 24 letters of the Greek Fingerspelling Alphabet with instant, real-time AI feedback through your webcam. Interactive, gamified, and 100% private in your browser.",
+      "startNow": "Start Practicing Now",
+      "howItWorks": "How It Works"
     },
     "learn": {
-      "handSelection": {
-        "title": "Select the hand that works better for you",
-        "left": "Left Hand",
-        "right": "Right Hand"
-      }
+      "wordQuest": "Word Quest",
+      "alphabetExplorer": "Alphabet Explorer",
+      "speedRush": "Speed Rush",
+      "holdPrompt": "Hold the sign steady in front of camera to confirm"
     },
     "aboutUs": {
-      "title": "About us"
+      "title": "About SigniFi",
+      "tagline": "Connect Beyond Words • Greek Sign Language (GSL)"
     },
     "notFound": {
       "title": "Page not found",
-      "subtitle": "Unfortunately an error has occurred. The requested page was not found."
+      "subtitle": "The requested page was not found."
     }
   }
 }
