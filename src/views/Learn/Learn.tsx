@@ -167,11 +167,15 @@ export const Learn: React.FC = () => {
       <Box
         sx={{
           display: 'flex',
-          flexWrap: 'wrap',
+          flexWrap: 'nowrap',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 1.5,
+          gap: 1,
           flexShrink: 0,
+          width: '100%',
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
+          '&::-webkit-scrollbar': { display: 'none' },
         }}
       >
         {/* Mode Switcher Tabs */}
@@ -187,6 +191,7 @@ export const Learn: React.FC = () => {
           textColor='primary'
           indicatorColor='primary'
           sx={{
+            flexShrink: 0,
             background: 'rgba(34, 38, 52, 0.85)',
             backdropFilter: 'blur(12px)',
             borderRadius: 3.5,
@@ -194,10 +199,10 @@ export const Learn: React.FC = () => {
             border: '1px solid rgba(255, 255, 255, 0.08)',
             '& .MuiTab-root': {
               fontWeight: 700,
-              fontSize: { xs: '0.82rem', md: '0.9rem' },
+              fontSize: { xs: '0.78rem', md: '0.88rem' },
               minHeight: 38,
               py: 0.5,
-              px: 2,
+              px: { xs: 1.2, sm: 1.8 },
               borderRadius: 3,
               color: '#94A3B8',
               '&.Mui-selected': {
@@ -213,7 +218,7 @@ export const Learn: React.FC = () => {
 
         {/* Center / Word / Alphabet / Speed Compact Helper */}
         {mode === 'words' && (
-          <Box sx={{ flex: 1, maxWidth: 500, mx: 1 }}>
+          <Box sx={{ flex: '1 1 auto', maxWidth: 500, minWidth: 0, mx: 0.5 }}>
             <WordSpeller
               currentWord={currentWord}
               currentLetterIndex={letterInWordIndex}
@@ -243,8 +248,11 @@ export const Learn: React.FC = () => {
               boxSizing: 'border-box',
               borderRadius: 3.5,
               border: '1px solid rgba(255, 255, 255, 0.08)',
-              overflowX: 'auto',
-              maxWidth: { xs: '100%', md: '52%' },
+              overflow: 'hidden',
+              flex: '1 1 auto',
+              minWidth: 0,
+              maxWidth: 480,
+              mx: 0.5,
             }}
           >
             <IconButton
@@ -258,7 +266,18 @@ export const Learn: React.FC = () => {
               <ArrowBackIcon fontSize='small' />
             </IconButton>
 
-            <Box sx={{ display: 'flex', gap: 0.5, overflowX: 'auto', py: 0.2 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 0.5,
+                overflowX: 'auto',
+                flex: 1,
+                minWidth: 0,
+                py: 0.2,
+                scrollbarWidth: 'none',
+                '&::-webkit-scrollbar': { display: 'none' },
+              }}
+            >
               {GSL_ALPHABET.map((item, idx) => (
                 <Button
                   key={item.letter}
