@@ -80,12 +80,12 @@ const OVERRIDE_LANDMARKS: Record<string, number[][]> = {
   ],
   // Ω (Omega, index 24): Broad horseshoe arch shape (Ω dome), upright hand with fingers curved in an open horseshoe curve
   'Ω': [
-    [0.0, -0.85, 0.0],
-    [-0.32, -0.60, 0.05], [-0.42, -0.25, 0.15], [-0.35, 0.05, 0.25], [-0.22, 0.22, 0.30],
-    [-0.22, 0.10, 0.05], [-0.24, 0.40, 0.18], [-0.18, 0.52, 0.32], [-0.10, 0.48, 0.40],
-    [0.0, 0.12, 0.05], [0.0, 0.45, 0.20], [0.0, 0.58, 0.35], [0.0, 0.54, 0.42],
-    [0.22, 0.10, 0.05], [0.24, 0.40, 0.18], [0.18, 0.52, 0.32], [0.10, 0.48, 0.40],
-    [0.40, 0.05, 0.0], [0.45, 0.30, 0.15], [0.35, 0.42, 0.28], [0.25, 0.38, 0.35],
+    [0.0, -0.55, -0.0],
+    [-0.32, -0.60, 0.05], [-0.42, -0.25, -0.15], [-0.35, 0.05, 0.25], [-0.22, 0.32, 0.30],
+    [-0.22, 0.10, -0.5], [-0.24, 0.40, -0.18], [-0.18, 0.52, 0.32], [-0.10, 0.48, 0.40],
+    [0.0, 0.12, -0.5], [0.0, 0.45, -0.20], [0.0, 0.58, 0.35], [0.0, 0.54, 0.42],
+    [0.22, 0.10, -0.5], [0.24, 0.40, -0.18], [0.28, 0.52, 0.32], [0.10, 0.48, 0.40],
+    [0.40, 0.05, -0.5], [0.45, 0.30, -0.15], [0.45, 0.42, 0.28], [0.25, 0.38, 0.35],
   ],
 }
 
@@ -118,10 +118,10 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
   const previousMousePosition = useRef({ x: 0, y: 0 })
   const normLetter = normalizeLetter(currentLetter)
 
-  // Initial Y rotation set depending on letter (180 degrees default, 0 for M/N)
+  // Initial Y rotation set depending on letter (180 degrees default, 0 for M/N/Omega to show front palm)
   const rotationOffset = useRef({
-    x: 0.05,
-    y: ['Μ', 'Ν'].includes(normLetter) ? 0 : Math.PI,
+    x: normLetter === 'Ω' ? 0.75 : 0.05,
+    y: ['Μ', 'Ν', 'Ω'].includes(normLetter) ? 0 : Math.PI,
   })
 
   const { i18n } = useTranslation()
@@ -138,8 +138,8 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
   useEffect(() => {
     const norm = normalizeLetter(currentLetter)
     activeTemplateRef.current = getLetterLandmarks(currentLetter)
-    if (['Μ', 'Ν'].includes(norm)) {
-      rotationOffset.current = { x: 0.05, y: 0 }
+    if (['Μ', 'Ν', 'Ω'].includes(norm)) {
+      rotationOffset.current = { x: norm === 'Ω' ? 0.75 : 0.05, y: 0 }
     } else {
       rotationOffset.current = { x: 0.05, y: Math.PI }
     }
@@ -266,7 +266,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
     FINGERS_CONFIG.forEach((finger) => {
       finger.joints.forEach((idx, step) => {
         const rad = finger.radii[step]
-        const cap = new THREE.Mesh(new THREE.SphereGeometry(rad * 1.02, 16, 16), handMaterial)
+        const cap = new THREE.Mesh(new THREE.SphereGeometry(rad * 1.02, 5, 5), handMaterial)
         handGroup.add(cap)
         jointCapMeshes.push({ mesh: cap, idx })
       })
@@ -275,7 +275,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
     // 6. Sculpted Organic Palm Structure
     // Smooth Rounded Wrist Base
     const wristDome = new THREE.Mesh(
-      new THREE.SphereGeometry(0.38, 1, 1),
+      new THREE.SphereGeometry(0.38, 3, 3),
       handMaterial
     )
     wristDome.scale.set(1.15, 0.85, 0.85)
@@ -283,7 +283,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
 
     // Fleshy Thenar Pad (Thumb Base Muscle)
     const thenarMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.3, 1, 1),
+      new THREE.SphereGeometry(0.35, 3, 3),
       handMaterial
     )
     thenarMesh.scale.set(1.2, 1.2, 0.9)
@@ -291,11 +291,19 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
 
     // Fleshy Hypothenar Pad (Pinky Base Muscle)
     const hypothenarMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.32, 1, 1),
+      new THREE.SphereGeometry(0.35, 3, 3),
       handMaterial
     )
     hypothenarMesh.scale.set(1.1, 1.15, 0.85)
     handGroup.add(hypothenarMesh)
+
+    // Solid Central Palm Slab (Fills the entire center of the palm)
+    const palmPlateMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.42, 3, 3),
+      handMaterial
+    )
+    palmPlateMesh.scale.set(1.25, 1.1, 0.65)
+    handGroup.add(palmPlateMesh)
 
     // Organic Metacarpal Palm Struts (Wrist to Knuckles)
     const metacarpalMeshes: THREE.Mesh[] = []
@@ -353,7 +361,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
 
       rotationOffset.current.y += deltaX * 0.012
       rotationOffset.current.x += deltaY * 0.012
-      rotationOffset.current.x = Math.max(-0.6, Math.min(0.6, rotationOffset.current.x))
+      rotationOffset.current.x = Math.max(-1.4, Math.min(1.4, rotationOffset.current.x))
 
       previousMousePosition.current = { x: e.clientX, y: e.clientY }
     }
@@ -380,7 +388,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
 
       rotationOffset.current.y += deltaX * 0.012
       rotationOffset.current.x += deltaY * 0.012
-      rotationOffset.current.x = Math.max(-0.6, Math.min(0.6, rotationOffset.current.x))
+      rotationOffset.current.x = Math.max(-1.4, Math.min(1.4, rotationOffset.current.x))
 
       previousMousePosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
     }
@@ -438,6 +446,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       // Base Landmark References
       const pWrist = currentPositions[0]
       const pThumbBase = currentPositions[1]
+      const pMiddleKnuckle = currentPositions[9]
       const pPinkyKnuckle = currentPositions[17]
 
       // A. Update Deformable Finger Loft Meshes
@@ -526,6 +535,11 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       if (pWrist) {
         if (wristDome) {
           wristDome.position.copy(pWrist)
+        }
+
+        if (palmPlateMesh && pMiddleKnuckle) {
+          const palmCenter = new THREE.Vector3().addVectors(pWrist, pMiddleKnuckle).multiplyScalar(0.5)
+          palmPlateMesh.position.copy(palmCenter)
         }
 
         if (thenarMesh && pThumbBase) {

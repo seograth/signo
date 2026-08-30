@@ -28,7 +28,9 @@ interface FingerAnalysis {
   thumbTouchesIndex: boolean
   thumbTouchesMiddle: boolean
   thumbTouchesRing: boolean
+  thumbTouchesPinky: boolean
   indexMiddleTogether: boolean
+  middleRingTogether: boolean
   fingerCurlCount: number
 }
 
@@ -176,7 +178,9 @@ export class GSLClassifier {
     const thumbTouchesIndex = dist(4, 8) < 0.35 * refScale
     const thumbTouchesMiddle = dist(4, 12) < 0.35 * refScale
     const thumbTouchesRing = dist(4, 16) < 0.35 * refScale
-    const indexMiddleTogether = dist(8, 12) < 0.25 * refScale
+    const thumbTouchesPinky = dist(4, 20) < 0.35 * refScale
+    const indexMiddleTogether = dist(8, 12) < 0.30 * refScale
+    const middleRingTogether = dist(12, 16) < 0.30 * refScale
 
     let curlCount = 0
     if (!indexExt) curlCount++
@@ -193,7 +197,9 @@ export class GSLClassifier {
       thumbTouchesIndex,
       thumbTouchesMiddle,
       thumbTouchesRing,
+      thumbTouchesPinky,
       indexMiddleTogether,
+      middleRingTogether,
       fingerCurlCount: curlCount,
     }
   }
@@ -238,8 +244,8 @@ export class GSLClassifier {
       boosted[3] = Math.max(boosted[3] * 2.2, 0.5)
     }
 
-    // Letter Ε (Epsilon): All fingers curled touching thumb
-    if (analysis.fingerCurlCount === 4 && (analysis.thumbTouchesIndex || analysis.thumbTouchesMiddle)) {
+    // Letter Ε (Epsilon): All 4 fingers curled touching thumb (including pinky!)
+    if (analysis.fingerCurlCount === 4 && analysis.thumbTouchesIndex && analysis.thumbTouchesPinky) {
       boosted[4] = Math.max(boosted[4] * 2.2, 0.5)
     }
 
@@ -251,6 +257,19 @@ export class GSLClassifier {
     // Letter Ι (Iota): Pinky pointing up, other 4 closed in fist
     if (analysis.pinkyExt && !analysis.indexExt && !analysis.middleExt && !analysis.ringExt && !analysis.thumbExt) {
       boosted[8] = Math.max(boosted[8] * 2.5, 0.55)
+    }
+
+    // Letter Μ (Mu, index 12 -> array index 11): 3 fingers (Index, Middle, Ring) grouped together over thumb
+    if (analysis.indexMiddleTogether && analysis.middleRingTogether && !analysis.thumbTouchesPinky) {
+      boosted[11] = Math.max(boosted[11] * 3.5, 0.65)
+      boosted[12] *= 0.2 // Suppress N (Nu) when 3 fingers are grouped
+      boosted[4] *= 0.2  // Suppress E (Epsilon)
+    } 
+    // Letter Ν (Nu, index 13 -> array index 12): 2 fingers (Index, Middle) grouped together over thumb, Ring separate/tucked
+    else if (analysis.indexMiddleTogether && !analysis.middleRingTogether && !analysis.thumbTouchesPinky) {
+      boosted[12] = Math.max(boosted[12] * 3.5, 0.65)
+      boosted[11] *= 0.2 // Suppress M (Mu) when only 2 fingers are grouped
+      boosted[4] *= 0.2  // Suppress E (Epsilon)
     }
 
     // Letter Ο (Omicron): All fingers in round O touching thumb
@@ -322,11 +341,13 @@ export class GSLClassifier {
       allProbabilities: smoothed,
       topThree: indexedProbs.slice(0, 3),
       isTargetMatch: (targetLetter: string) => {
-        // Strict & Reliable: Must be Rank 1 (>= 0.45) or strong Rank 2 (>= 0.38)
+        // Strict & Reliable: Must be Rank 1 (>= 0.40) or strong Rank 2 (>= 0.32), or Rank 1-3 for M (>= 0.25)
         const top1 = indexedProbs[0]
         const top2 = indexedProbs[1]
-        if (top1 && top1.letter === targetLetter && top1.confidence >= 0.45) return true
-        if (top2 && top2.letter === targetLetter && top2.confidence >= 0.38) return true
+        const top3 = indexedProbs[2]
+        if (top1 && top1.letter === targetLetter && top1.confidence >= 0.40) return true
+        if (top2 && top2.letter === targetLetter && top2.confidence >= 0.32) return true
+        if (targetLetter === 'Μ' && (top1?.letter === 'Μ' || top2?.letter === 'Μ' || top3?.letter === 'Μ') && (top1?.confidence >= 0.25 || top2?.confidence >= 0.25 || top3?.confidence >= 0.25)) return true
         return false
       },
     }

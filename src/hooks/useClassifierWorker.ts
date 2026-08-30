@@ -42,8 +42,10 @@ export const useClassifierWorker = () => {
           const isTargetMatch = (targetLetter: string) => {
             const top1 = result.topThree[0]
             const top2 = result.topThree[1]
-            if (top1 && top1.letter === targetLetter && top1.confidence >= 0.45) return true
-            if (top2 && top2.letter === targetLetter && top2.confidence >= 0.38) return true
+            const top3 = result.topThree[2]
+            if (top1 && top1.letter === targetLetter && top1.confidence >= 0.40) return true
+            if (top2 && top2.letter === targetLetter && top2.confidence >= 0.32) return true
+            if (targetLetter === 'Μ' && (top1?.letter === 'Μ' || top2?.letter === 'Μ' || top3?.letter === 'Μ') && ((top1 && top1.confidence >= 0.25) || (top2 && top2.confidence >= 0.25) || (top3 && top3.confidence >= 0.25))) return true
             return false
           }
           return {
