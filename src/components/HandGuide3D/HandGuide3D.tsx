@@ -29,6 +29,84 @@ const FINGERS_CONFIG = [
 const RADIAL_SEGS = 16
 const LONG_SEGS_PER_BONE = 4
 
+// Helper to normalize Latin letter inputs to Greek equivalents
+function normalizeLetter(letter: string): string {
+  const map: Record<string, string> = {
+    'A': 'Α', 'B': 'Β', 'E': 'Ε', 'Z': 'Ζ', 'H': 'Ή', 'I': 'Ι',
+    'K': 'Κ', 'M': 'Μ', 'N': 'Ν', 'O': 'Ο', 'P': 'Ρ', 'T': 'Τ',
+    'Y': 'Υ', 'X': 'Χ',
+  }
+  return map[letter.toUpperCase()] || letter
+}
+
+// Custom corrected 3D landmark templates for GSL letters requiring shape fixes
+const OVERRIDE_LANDMARKS: Record<string, number[][]> = {
+  // Γ (Gamma, index 3): Wrist at top, Index finger pointing straight DOWN (-Y), thumb extended left horizontally (-X)
+  'Γ': [
+    [0.0, 0.5, 0.0],
+    [-0.15, 0.35, 0.05], [-0.35, 0.20, 0.05], [-0.60, 0.20, 0.0], [-0.85, 0.20, -0.05],
+    [-0.15, 0.25, 0.05], [-0.15, -0.10, 0.0], [-0.15, -0.38, -0.03], [-0.15, -0.62, -0.05],
+    [0.10, 0.20, 0.05], [0.10, 0.05, 0.20], [0.10, 0.25, 0.15], [0.10, 0.25, 0.0],
+    [0.25, 0.18, 0.03], [0.25, 0.08, 0.18], [0.25, 0.25, 0.12], [0.25, 0.25, 0.0],
+    [0.38, 0.15, 0.0], [0.38, 0.05, 0.15], [0.38, 0.18, 0.10], [0.38, 0.18, 0.0],
+  ],
+  // Λ (Lambda, index 11): Inverted Λ shape with Index extending DOWN-RIGHT and Thumb extending DOWN-LEFT
+  'Λ': [
+    [0.0, 0.65, 0.0],
+    [-0.15, 0.45, 0.05], [-0.30, 0.25, 0.05], [-0.50, -0.05, 0.0], [-0.70, -0.35, -0.05],
+    [0.05, 0.30, 0.05], [0.20, 0.05, 0.0], [0.40, -0.22, -0.03], [0.58, -0.48, -0.05],
+    [0.15, 0.25, 0.05], [0.15, 0.38, 0.18], [0.15, 0.22, 0.12], [0.15, 0.22, 0.0],
+    [0.28, 0.22, 0.03], [0.28, 0.35, 0.16], [0.28, 0.20, 0.10], [0.28, 0.20, 0.0],
+    [0.40, 0.18, 0.0], [0.40, 0.30, 0.14], [0.40, 0.18, 0.08], [0.40, 0.18, 0.0],
+  ],
+  // Π (Pi, index 16): Wrist at top, Index & Middle fingers spaced out clearly pointing straight DOWN like legs of Π
+  'Π': [
+    [0.0, 0.75, -0.1],
+    [-0.30, 0.60, -0.05], [-0.32, 0.40, 0.02], [-0.10, 0.35, 0.08], [0.0, 0.28, 0.08],
+    [-0.22, 0.25, 0.0], [-0.24, -0.10, 0.08], [-0.25, -0.40, 0.12], [-0.26, -0.68, 0.15],
+    [0.22, 0.25, 0.0], [0.24, -0.10, 0.08], [0.25, -0.40, 0.12], [0.26, -0.68, 0.15],
+    [0.35, 0.20, -0.05], [0.35, 0.32, 0.08], [0.35, 0.20, 0.05], [0.35, 0.20, -0.05],
+    [0.48, 0.18, -0.08], [0.48, 0.28, 0.05], [0.48, 0.18, 0.02], [0.48, 0.18, -0.08],
+  ],
+  // Τ (Tau, index 19): Upright fist facing front, thumb tucked under index peeking out between index & middle
+  'Τ': [
+    [0.0, -0.9, 0.0],
+    [-0.30, -0.65, 0.05], [-0.35, -0.40, 0.15], [-0.10, -0.05, 0.32], [-0.05, -0.02, 0.38],
+    [-0.20, -0.15, 0.05], [-0.22, 0.15, 0.20], [-0.22, -0.05, 0.18], [-0.20, -0.15, 0.08],
+    [0.05, -0.15, 0.05], [0.05, 0.15, 0.20], [0.05, -0.05, 0.18], [0.05, -0.15, 0.08],
+    [0.25, -0.20, 0.03], [0.25, 0.10, 0.18], [0.25, -0.08, 0.15], [0.25, -0.18, 0.06],
+    [0.40, -0.25, 0.0], [0.40, 0.02, 0.15], [0.40, -0.10, 0.12], [0.40, -0.20, 0.04],
+  ],
+  // Ω (Omega, index 24): Fingers bent sharply over palm forming the horseshoe arch of Ω
+  'Ω': [
+    [0.0, -0.85, 0.0],
+    [-0.25, -0.60, 0.05], [-0.35, -0.35, 0.15], [-0.30, -0.10, 0.22], [-0.15, 0.05, 0.25],
+    [-0.20, -0.15, 0.05], [-0.22, 0.25, 0.25], [-0.20, 0.12, 0.35], [-0.12, -0.05, 0.28],
+    [0.0, -0.12, 0.05], [0.0, 0.30, 0.25], [0.0, 0.15, 0.38], [0.0, -0.05, 0.30],
+    [0.20, -0.15, 0.05], [0.22, 0.25, 0.25], [0.20, 0.12, 0.35], [0.12, -0.05, 0.28],
+    [0.35, -0.20, 0.03], [0.38, 0.15, 0.20], [0.35, 0.05, 0.30], [0.25, -0.08, 0.25],
+  ],
+}
+
+// Letters that require horizontal mirroring
+const HORIZONTALLY_MIRRORED_LETTERS = ['Ζ', 'Θ', 'Ξ', 'Μ', 'Ν', 'Ω']
+
+function getLetterLandmarks(letter: string): number[][] {
+  const norm = normalizeLetter(letter)
+  const idx = LETTER_TO_INDEX[norm] || LETTER_TO_INDEX[letter] || 1
+  let landmarks =
+    OVERRIDE_LANDMARKS[norm] ||
+    OVERRIDE_LANDMARKS[letter] ||
+    (gslTemplates as Record<string, number[][]>)[String(idx)] ||
+    (gslTemplates as Record<string, number[][]>)['1']
+
+  if (HORIZONTALLY_MIRRORED_LETTERS.includes(norm) || HORIZONTALLY_MIRRORED_LETTERS.includes(letter)) {
+    landmarks = landmarks.map(([x, y, z]) => [-x, y, z])
+  }
+
+  return landmarks
+}
+
 export const HandGuide3D: React.FC<HandGuide3DProps> = ({
   currentLetter,
   selectedHand,
@@ -37,23 +115,26 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
   const mountRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
   const previousMousePosition = useRef({ x: 0, y: 0 })
-  // Initial Y rotation set to Math.PI (180 degrees) as default position
-  const rotationOffset = useRef({ x: 0.05, y: Math.PI })
+  const normLetter = normalizeLetter(currentLetter)
 
-  const letterIndex = LETTER_TO_INDEX[currentLetter] || 1
+  // Initial Y rotation set depending on letter (180 degrees default, 0 for M/N)
+  const rotationOffset = useRef({
+    x: 0.05,
+    y: ['Μ', 'Ν'].includes(normLetter) ? 0 : Math.PI,
+  })
+
   const letterInfo: GslLetter =
-    GSL_ALPHABET.find((l) => l.letter === currentLetter) || GSL_ALPHABET[0]
+    GSL_ALPHABET.find((l) => l.letter === normLetter || l.letter === currentLetter) || GSL_ALPHABET[0]
 
-  const activeTemplateRef = useRef<number[][]>(
-    (gslTemplates as Record<string, number[][]>)[String(letterIndex)] ||
-      (gslTemplates as Record<string, number[][]>)['1']
-  )
+  const activeTemplateRef = useRef<number[][]>(getLetterLandmarks(currentLetter))
 
   useEffect(() => {
-    const idx = LETTER_TO_INDEX[currentLetter] || 1
-    const template = (gslTemplates as Record<string, number[][]>)[String(idx)]
-    if (template) {
-      activeTemplateRef.current = template
+    const norm = normalizeLetter(currentLetter)
+    activeTemplateRef.current = getLetterLandmarks(currentLetter)
+    if (['Μ', 'Ν'].includes(norm)) {
+      rotationOffset.current = { x: 0.05, y: 0 }
+    } else {
+      rotationOffset.current = { x: 0.05, y: Math.PI }
     }
   }, [currentLetter])
 
@@ -187,7 +268,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
     // 6. Sculpted Organic Palm Structure
     // Smooth Rounded Wrist Base
     const wristDome = new THREE.Mesh(
-      new THREE.SphereGeometry(0.38, 20, 20),
+      new THREE.SphereGeometry(0.38, 1, 1),
       handMaterial
     )
     wristDome.scale.set(1.15, 0.85, 0.85)
@@ -195,7 +276,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
 
     // Fleshy Thenar Pad (Thumb Base Muscle)
     const thenarMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.36, 20, 20),
+      new THREE.SphereGeometry(0.3, 1, 1),
       handMaterial
     )
     thenarMesh.scale.set(1.2, 1.2, 0.9)
@@ -203,7 +284,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
 
     // Fleshy Hypothenar Pad (Pinky Base Muscle)
     const hypothenarMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.32, 20, 20),
+      new THREE.SphereGeometry(0.32, 1, 1),
       handMaterial
     )
     hypothenarMesh.scale.set(1.1, 1.15, 0.85)
@@ -519,7 +600,12 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
   }, [selectedHand])
 
   const resetRotation = () => {
-    rotationOffset.current = { x: 0.05, y: Math.PI }
+    const norm = normalizeLetter(currentLetter)
+    if (['Μ', 'Ν'].includes(norm)) {
+      rotationOffset.current = { x: 0.05, y: 0 }
+    } else {
+      rotationOffset.current = { x: 0.05, y: Math.PI }
+    }
   }
 
   return (
