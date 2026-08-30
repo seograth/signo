@@ -37,7 +37,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: '"Inter", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     h1: {
       fontSize: '3rem',
       fontWeight: 800,
