@@ -32,12 +32,56 @@ interface FingerAnalysis {
   fingerCurlCount: number
 }
 
+export interface MotionVector {
+  dx: number
+  dy: number
+  dz: number
+  velocity: number
+}
+
+export class TrajectoryTracker {
+  private positionBuffer: Landmark3D[][] = []
+  private readonly maxFrames = 15
+
+  public pushFrame(landmarks: Landmark3D[]): MotionVector[] {
+    if (!landmarks || landmarks.length < 21) return []
+
+    this.positionBuffer.push(landmarks)
+    if (this.positionBuffer.length > this.maxFrames) {
+      this.positionBuffer.shift()
+    }
+
+    if (this.positionBuffer.length < 2) return []
+
+    const current = this.positionBuffer[this.positionBuffer.length - 1]
+    const previous = this.positionBuffer[this.positionBuffer.length - 2]
+
+    return current.map((lm, idx) => {
+      const prevLm = previous[idx] || lm
+      const dx = lm.x - prevLm.x
+      const dy = lm.y - prevLm.y
+      const dz = (lm.z || 0) - (prevLm.z || 0)
+      return {
+        dx,
+        dy,
+        dz,
+        velocity: Math.sqrt(dx * dx + dy * dy + dz * dz),
+      }
+    })
+  }
+
+  public reset() {
+    this.positionBuffer = []
+  }
+}
+
 export class GSLClassifier {
   private isReady = false
   private weights: any = null
   private probabilityHistory: number[][] = []
   private readonly historySize = 3
   private loadPromise: Promise<void> | null = null
+  public trajectoryTracker = new TrajectoryTracker()
 
   constructor() {
     this.loadModel()
@@ -69,6 +113,7 @@ export class GSLClassifier {
    */
   public resetHistory() {
     this.probabilityHistory = []
+    this.trajectoryTracker.reset()
   }
 
   /**

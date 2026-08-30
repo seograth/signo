@@ -172,4 +172,27 @@ describe('GSLClassifier Unit Tests', () => {
       expect(prediction).not.toBeNull()
     })
   })
+
+  describe('TrajectoryTracker', () => {
+    it('calculates spatial motion vectors and velocities across consecutive frames', () => {
+      const tracker = classifier.trajectoryTracker
+      tracker.reset()
+
+      const frame1 = createSyntheticHand()
+      const frame2 = createSyntheticHand().map((lm) => ({
+        x: lm.x + 0.05,
+        y: lm.y - 0.05,
+        z: lm.z,
+      }))
+
+      const vectors1 = tracker.pushFrame(frame1)
+      expect(vectors1).toHaveLength(0) // Needs at least 2 frames
+
+      const vectors2 = tracker.pushFrame(frame2)
+      expect(vectors2).toHaveLength(21)
+      expect(vectors2[0].dx).toBeCloseTo(0.05, 4)
+      expect(vectors2[0].dy).toBeCloseTo(-0.05, 4)
+      expect(vectors2[0].velocity).toBeGreaterThan(0)
+    })
+  })
 })
