@@ -185,7 +185,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
         if (Hands) {
           const hands = new Hands({
-            locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+            locateFile: (file: string) => `/mediapipe/${file}`,
           })
 
           hands.setOptions({
@@ -456,8 +456,12 @@ export const CameraView: React.FC<CameraViewProps> = ({
         </Box>
       )}
 
-      {/* Floating Status Pill (Top Left) */}
+      {/* Floating Status Pill (Top Left) with Accessibility ARIA Live Region */}
       <Box
+        role='status'
+        aria-live='polite'
+        aria-atomic='true'
+        aria-label='Sign language gesture recognition live status'
         sx={{
           position: 'absolute',
           top: { xs: 10, sm: 20 },

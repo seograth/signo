@@ -1,6 +1,5 @@
 // Client-Side GSL Neural Network & Robust Geometric Feature Classifier
 
-import modelData from '../assets/gsl_model.json'
 import { GSL_ALPHABET, GslLetter } from './gslDictionary'
 
 export interface Landmark3D {
@@ -38,18 +37,31 @@ export class GSLClassifier {
   private weights: any = null
   private probabilityHistory: number[][] = []
   private readonly historySize = 3
+  private loadPromise: Promise<void> | null = null
 
   constructor() {
-    this.init()
+    this.loadModel()
   }
 
-  private init() {
-    try {
-      this.weights = modelData
-      this.isReady = true
-    } catch (e) {
-      console.warn('Could not load bundled gsl_model.json, using geometric engine.', e)
-    }
+  /**
+   * Asynchronously lazy-loads model weights to prevent main JS bundle inflation
+   */
+  public async loadModel(): Promise<void> {
+    if (this.isReady) return
+    if (this.loadPromise) return this.loadPromise
+
+    this.loadPromise = (async () => {
+      try {
+        const modelModule = await import('../assets/gsl_model.json')
+        this.weights = modelModule.default || modelModule
+        this.isReady = true
+      } catch (e) {
+        console.warn('Could not lazy-load gsl_model.json, using fallback geometric engine.', e)
+        this.isReady = false
+      }
+    })()
+
+    return this.loadPromise
   }
 
   /**
