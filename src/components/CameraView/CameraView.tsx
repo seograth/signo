@@ -8,6 +8,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { Landmark3D, PredictionResult, gslClassifier } from '../../services/gslClassifier'
 import audioEngine from '../../services/audioEngine'
+import useClassifierWorker from '../../hooks/useClassifierWorker'
 
 // MediaPipe Hand Landmark Connections
 const HAND_CONNECTIONS = [
@@ -266,7 +267,9 @@ export const CameraView: React.FC<CameraViewProps> = ({
     }
   }, [cameraActive, isPaused])
 
-  const handleMediaPipeResults = (results: any) => {
+  const { predict: predictWorker } = useClassifierWorker()
+
+  const handleMediaPipeResults = async (results: any) => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -292,7 +295,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
         z: lm.z || 0,
       }))
 
-      const prediction = gslClassifier.predict(landmarks3D)
+      const prediction = await predictWorker(landmarks3D)
       if (prediction) {
         setDetectedLetter(prediction.letter)
         setCurrentConfidence(prediction.confidence)
