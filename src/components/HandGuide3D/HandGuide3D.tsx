@@ -1,8 +1,33 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { Box, Typography, IconButton, Tooltip } from '@mui/material'
+import {
+  Box,
+  Typography,
+  IconButton,
+  Tooltip,
+  Button,
+  Slider,
+  Drawer,
+  Snackbar,
+  Alert,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip,
+  Switch,
+  FormControlLabel,
+} from '@mui/material'
 import RotateRightIcon from '@mui/icons-material/RotateRight'
 import PanToolIcon from '@mui/icons-material/PanTool'
+import TuneIcon from '@mui/icons-material/Tune'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
+import SaveIcon from '@mui/icons-material/Save'
+import CloseIcon from '@mui/icons-material/Close'
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
+import ThreeDRotationIcon from '@mui/icons-material/ThreeDRotation'
+import TouchAppIcon from '@mui/icons-material/TouchApp'
 import { useTranslation } from 'react-i18next'
 import gslTemplates from '../../assets/gsl_landmark_templates.json'
 import { GSL_ALPHABET, GslLetter, LETTER_TO_INDEX } from '../../services/gslDictionary'
@@ -13,19 +38,31 @@ interface HandGuide3DProps {
   onHandToggle?: () => void
 }
 
+interface CustomGestureConfig {
+  landmarks: number[][]
+  rotX?: number
+  rotY?: number
+  rotZ?: number
+  isMirrored?: boolean
+}
+
 // Finger definitions with natural human/cartoon tapering
 const FINGERS_CONFIG = [
-  // Thumb: landmark indices 1 -> 2 -> 3 -> 4
-  { name: 'thumb', joints: [1, 2, 3, 4], radii: [0.18, 0.16, 0.14, 0.12] },
-  // Index: landmark indices 5 -> 6 -> 7 -> 8
-  { name: 'index', joints: [5, 6, 7, 8], radii: [0.14, 0.13, 0.11, 0.095] },
-  // Middle: landmark indices 9 -> 10 -> 11 -> 12
-  { name: 'middle', joints: [9, 10, 11, 12], radii: [0.145, 0.135, 0.115, 0.095] },
-  // Ring: landmark indices 13 -> 14 -> 15 -> 16
-  { name: 'ring', joints: [13, 14, 15, 16], radii: [0.14, 0.125, 0.11, 0.09] },
-  // Pinky: landmark indices 17 -> 18 -> 19 -> 20
-  { name: 'pinky', joints: [17, 18, 19, 20], radii: [0.12, 0.11, 0.09, 0.075] },
+  { name: 'Thumb', joints: [1, 2, 3, 4], radii: [0.18, 0.16, 0.14, 0.12] },
+  { name: 'Index', joints: [5, 6, 7, 8], radii: [0.14, 0.13, 0.11, 0.095] },
+  { name: 'Middle', joints: [9, 10, 11, 12], radii: [0.145, 0.135, 0.115, 0.095] },
+  { name: 'Ring', joints: [13, 14, 15, 16], radii: [0.14, 0.125, 0.11, 0.09] },
+  { name: 'Pinky', joints: [17, 18, 19, 20], radii: [0.12, 0.11, 0.09, 0.075] },
 ]
+
+const LANDMARK_NAMES: Record<number, string> = {
+  0: 'Wrist',
+  1: 'Thumb CMC', 2: 'Thumb MCP', 3: 'Thumb IP', 4: 'Thumb Tip',
+  5: 'Index MCP', 6: 'Index PIP', 7: 'Index DIP', 8: 'Index Tip',
+  9: 'Middle MCP', 10: 'Middle PIP', 11: 'Middle DIP', 12: 'Middle Tip',
+  13: 'Ring MCP', 14: 'Ring PIP', 15: 'Ring DIP', 16: 'Ring Tip',
+  17: 'Pinky MCP', 18: 'Pinky PIP', 19: 'Pinky DIP', 20: 'Pinky Tip',
+}
 
 const RADIAL_SEGS = 16
 const LONG_SEGS_PER_BONE = 4
@@ -40,9 +77,152 @@ function normalizeLetter(letter: string): string {
   return map[letter.toUpperCase()] || letter
 }
 
-// Custom corrected 3D landmark templates for GSL letters requiring shape fixes
-const OVERRIDE_LANDMARKS: Record<string, number[][]> = {
-  // Γ (Gamma, index 3): Wrist at top, Index finger pointing straight DOWN (-Y), thumb extended left horizontally (-X)
+const OVERRIDE_LANDMARKS: Record<string, number[][] | CustomGestureConfig> = {
+  'Ξ': {
+    rotX: 0.05,
+    rotY: 3.14,
+    rotZ: 0.00,
+    isMirrored: false,
+    landmarks: [
+      [1.068, -0.545, 0.219],
+      [0.901, -0.006, 0.257],
+      [0.528, 0.182, 0.238],
+      [0.187, 0.100, 0.228],
+      [-0.025, -0.094, 0.202],
+      [0.373, 0.376, 0.045],
+      [-0.126, 0.536, -0.011],
+      [-0.371, 0.607, -0.026],
+      [-0.562, 0.646, -0.029],
+      [0.297, 0.052, -0.001],
+      [-0.214, 0.190, -0.056],
+      [-0.468, 0.255, -0.085],
+      [-0.675, 0.317, -0.109],
+      [0.276, -0.278, -0.032],
+      [-0.222, -0.238, -0.106],
+      [-0.489, -0.206, -0.182],
+      [-0.711, -0.206, -0.230],
+      [0.275, -0.603, -0.041],
+      [-0.038, -0.438, -0.092],
+      [-0.032, -0.341, -0.097],
+      [0.028, -0.304, -0.093],
+    ],
+  },
+  'Ν': {
+    rotX: 0.05,
+    rotY: 0.00,
+    rotZ: 0.00,
+    isMirrored: false,
+    landmarks: [
+      [-0.001, -0.947, -0.198],
+      [0.280, -0.597, -0.098],
+      [0.149, -0.297, 0.002],
+      [-0.001, -0.097, 0.082],
+      [-0.101, 0.003, 0.122],
+      [0.280, 0.103, -0.198],
+      [0.280, 0.433, 0.022],
+      [0.280, 0.133, 0.222],
+      [0.280, -0.167, 0.182],
+      [0.080, 0.133, -0.198],
+      [0.080, 0.453, 0.022],
+      [0.080, 0.153, 0.242],
+      [0.080, -0.147, 0.202],
+      [-0.120, 0.103, -0.198],
+      [-0.120, 0.313, -0.048],
+      [-0.120, 0.133, 0.062],
+      [-0.120, -0.067, 0.002],
+      [-0.321, 0.033, -0.198],
+      [-0.321, 0.273, -0.058],
+      [-0.321, 0.113, 0.042],
+      [-0.321, -0.067, -0.018],
+    ],
+  },
+  'Μ': {
+    rotX: 0.05,
+    rotY: 0.00,
+    rotZ: 0.00,
+    isMirrored: false,
+    landmarks: [
+      [0.004, -0.949, -0.214],
+      [0.284, -0.599, -0.114],
+      [0.154, -0.299, -0.014],
+      [-0.016, -0.099, 0.066],
+      [-0.176, 0.001, 0.106],
+      [0.284, 0.101, -0.214],
+      [0.284, 0.431, 0.006],
+      [0.284, 0.131, 0.206],
+      [0.284, -0.169, 0.166],
+      [0.084, 0.131, -0.214],
+      [0.084, 0.451, 0.006],
+      [0.084, 0.151, 0.226],
+      [0.084, -0.149, 0.186],
+      [-0.116, 0.101, -0.214],
+      [-0.116, 0.411, -0.014],
+      [-0.116, 0.131, 0.186],
+      [-0.116, -0.129, 0.146],
+      [-0.316, 0.031, -0.214],
+      [-0.316, 0.271, -0.074],
+      [-0.316, 0.111, 0.026],
+      [-0.316, -0.069, -0.034],
+    ],
+  },
+  'Θ': {
+    rotX: 0.05,
+    rotY: 3.14,
+    rotZ: 0.00,
+    isMirrored: false,
+    landmarks: [
+      [0.975, -0.614, 0.247],
+      [0.923, -0.015, 0.255],
+      [0.613, 0.333, 0.204],
+      [0.210, 0.239, 0.159],
+      [-0.048, 0.042, 0.115],
+      [0.399, 0.396, 0.018],
+      [-0.169, 0.510, -0.083],
+      [-0.482, 0.517, -0.137],
+      [-0.739, 0.500, -0.165],
+      [0.271, 0.049, -0.010],
+      [-0.320, 0.187, -0.107],
+      [-0.677, 0.250, -0.151],
+      [-0.934, 0.272, -0.181],
+      [0.193, -0.282, -0.027],
+      [-0.265, -0.181, -0.096],
+      [-0.112, -0.170, -0.044],
+      [0.050, -0.196, 0.019],
+      [0.157, -0.599, -0.038],
+      [-0.128, -0.426, -0.068],
+      [-0.027, -0.406, 0.007],
+      [0.110, -0.405, 0.083],
+    ],
+  },
+  'Ζ': {
+    rotX: 0.05,
+    rotY: -0.03,
+    rotZ: 0.00,
+    isMirrored: true,
+    landmarks: [
+      [0.924, -0.537, 0.165],
+      [0.809, 0.020, 0.198],
+      [0.441, 0.277, 0.201],
+      [0.113, 0.297, 0.219],
+      [-0.099, 0.199, 0.229],
+      [0.310, 0.392, -0.017],
+      [-0.167, 0.550, -0.075],
+      [-0.467, 0.604, -0.091],
+      [-0.712, 0.619, -0.111],
+      [0.209, 0.134, -0.031],
+      [-0.215, 0.134, -0.095],
+      [-0.087, 0.055, -0.051],
+      [0.061, 0.040, -0.018],
+      [0.181, -0.194, -0.032],
+      [-0.203, -0.178, -0.088],
+      [-0.069, -0.227, -0.019],
+      [0.076, -0.220, 0.028],
+      [0.174, -0.558, -0.031],
+      [-0.227, -0.483, -0.108],
+      [-0.427, -0.472, -0.131],
+      [-0.627, -0.451, -0.142],
+    ],
+  },
   'Γ': [
     [0.0, 0.5, 0.0],
     [-0.15, 0.35, 0.05], [-0.35, 0.20, 0.05], [-0.60, 0.20, 0.0], [-0.85, 0.20, -0.05],
@@ -51,7 +231,6 @@ const OVERRIDE_LANDMARKS: Record<string, number[][]> = {
     [0.25, 0.18, 0.03], [0.25, 0.08, 0.18], [0.25, 0.25, 0.12], [0.25, 0.25, 0.0],
     [0.38, 0.15, 0.0], [0.38, 0.05, 0.15], [0.38, 0.18, 0.10], [0.38, 0.18, 0.0],
   ],
-  // Λ (Lambda, index 11): Inverted Λ shape with Index extending DOWN-RIGHT and Thumb extending DOWN-LEFT
   'Λ': [
     [0.0, 0.65, 0.0],
     [-0.15, 0.45, 0.05], [-0.30, 0.25, 0.05], [-0.50, -0.05, 0.0], [-0.70, -0.35, -0.05],
@@ -60,7 +239,6 @@ const OVERRIDE_LANDMARKS: Record<string, number[][]> = {
     [0.28, 0.22, 0.03], [0.28, 0.35, 0.16], [0.28, 0.20, 0.10], [0.28, 0.20, 0.0],
     [0.40, 0.18, 0.0], [0.40, 0.30, 0.14], [0.40, 0.18, 0.08], [0.40, 0.18, 0.0],
   ],
-  // Π (Pi, index 16): Wrist at top, Index (2nd) & Pinky (5th) fingers extending straight DOWN, Middle & Ring folded UP
   'Π': [
     [0.0, 0.75, -0.1],
     [-0.28, 0.60, -0.05], [-0.30, 0.42, 0.02], [-0.22, 0.35, 0.08], [-0.15, 0.28, 0.08],
@@ -69,43 +247,136 @@ const OVERRIDE_LANDMARKS: Record<string, number[][]> = {
     [0.15, 0.20, -0.02], [0.15, 0.40, 0.10], [0.15, 0.28, 0.06], [0.15, 0.20, -0.04],
     [0.32, 0.22, -0.05], [0.34, -0.10, 0.08], [0.35, -0.40, 0.12], [0.36, -0.68, 0.15],
   ],
-  // Τ (Tau, index 19): Wrist at top, palm looking downwards, Index (2nd finger) pointing straight DOWNWARD, fist folded downwards
-  'Τ': [
-    [0.0, 0.75, -0.1],
-    [-0.28, 0.55, -0.05], [-0.30, 0.38, 0.05], [-0.20, 0.25, 0.15], [-0.10, 0.20, 0.20],
-    [-0.15, 0.25, 0.0], [-0.18, -0.10, 0.08], [-0.20, -0.40, 0.12], [-0.22, -0.65, 0.15],
-    [0.0, 0.20, 0.05], [0.0, -0.05, 0.20], [0.0, -0.20, 0.18], [0.0, -0.30, 0.10],
-    [0.18, 0.18, 0.03], [0.18, -0.05, 0.18], [0.18, -0.20, 0.15], [0.16, -0.30, 0.08],
-    [0.35, 0.15, 0.0], [0.35, -0.05, 0.15], [0.35, -0.18, 0.12], [0.30, -0.28, 0.05],
-  ],
-  // Ω (Omega, index 24): Broad horseshoe arch shape (Ω dome), upright hand with fingers curved in an open horseshoe curve
-  'Ω': [
-    [0.0, -0.55, -0.0],
-    [-0.32, -0.60, 0.05], [-0.42, -0.25, -0.15], [-0.35, 0.05, 0.25], [-0.22, 0.32, 0.30],
-    [-0.22, 0.10, -0.5], [-0.24, 0.40, -0.18], [-0.18, 0.52, 0.32], [-0.10, 0.48, 0.40],
-    [0.0, 0.12, -0.5], [0.0, 0.45, -0.20], [0.0, 0.58, 0.35], [0.0, 0.54, 0.42],
-    [0.22, 0.10, -0.5], [0.24, 0.40, -0.18], [0.28, 0.52, 0.32], [0.10, 0.48, 0.40],
-    [0.40, 0.05, -0.5], [0.45, 0.30, -0.15], [0.45, 0.42, 0.28], [0.25, 0.38, 0.35],
-  ],
+  'Τ': {
+    rotX: -0.04,
+    rotY: -2.81,
+    rotZ: 0.00,
+    isMirrored: false,
+    landmarks: [
+      [0.000, 0.750, -0.100],
+      [-0.370, 0.550, -0.050],
+      [-0.420, 0.330, -0.150],
+      [-0.200, 0.250, -0.200],
+      [-0.100, 0.200, -0.230],
+      [-0.200, 0.240, -0.080],
+      [-0.240, -0.100, 0.160],
+      [-0.220, -0.310, 0.230],
+      [-0.220, -0.570, 0.270],
+      [0.000, 0.200, 0.050],
+      [0.000, -0.050, 0.200],
+      [0.000, -0.200, 0.180],
+      [0.000, -0.170, -0.050],
+      [0.180, 0.180, 0.030],
+      [0.180, -0.050, 0.180],
+      [0.180, -0.200, 0.150],
+      [0.160, -0.130, -0.150],
+      [0.350, 0.150, 0.000],
+      [0.350, -0.050, 0.150],
+      [0.350, -0.180, 0.120],
+      [0.300, -0.120, -0.180],
+    ],
+  },
+  'Ω': {
+    rotX: -0.98,
+    rotY: 0.00,
+    rotZ: 0.00,
+    isMirrored: false,
+    landmarks: [
+      [0.000, -0.550, 0.000],
+      [-0.320, -0.600, 0.050],
+      [-0.420, -0.250, -0.150],
+      [-0.350, 0.050, 0.250],
+      [-0.220, 0.320, 0.300],
+      [-0.220, 0.100, -0.500],
+      [-0.240, 0.400, -0.180],
+      [-0.180, 0.520, 0.320],
+      [-0.100, 0.480, 0.400],
+      [0.000, 0.120, -0.500],
+      [0.000, 0.450, -0.200],
+      [0.000, 0.580, 0.350],
+      [0.000, 0.540, 0.420],
+      [0.220, 0.100, -0.500],
+      [0.240, 0.400, -0.180],
+      [0.280, 0.520, 0.320],
+      [0.100, 0.480, 0.400],
+      [0.400, 0.050, -0.500],
+      [0.450, 0.300, -0.150],
+      [0.450, 0.420, 0.280],
+      [0.250, 0.380, 0.350],
+    ],
+  },
 }
 
-// Letters that require horizontal mirroring
 const HORIZONTALLY_MIRRORED_LETTERS = ['Ζ', 'Θ', 'Ξ', 'Μ', 'Ν']
 
-function getLetterLandmarks(letter: string): number[][] {
+function getSavedGestureConfig(letter: string): CustomGestureConfig {
   const norm = normalizeLetter(letter)
   const idx = LETTER_TO_INDEX[norm] || LETTER_TO_INDEX[letter] || 1
-  let landmarks =
-    OVERRIDE_LANDMARKS[norm] ||
-    OVERRIDE_LANDMARKS[letter] ||
-    (gslTemplates as Record<string, number[][]>)[String(idx)] ||
-    (gslTemplates as Record<string, number[][]>)['1']
 
-  if (HORIZONTALLY_MIRRORED_LETTERS.includes(norm) || HORIZONTALLY_MIRRORED_LETTERS.includes(letter)) {
+  const defaultRotX = norm === 'Ω' ? 0.75 : 0.05
+  const defaultRotY = ['Μ', 'Ν', 'Ω'].includes(norm) ? 0 : Math.PI
+  const defaultRotZ = 0
+  const defaultMirrored = HORIZONTALLY_MIRRORED_LETTERS.includes(norm) || HORIZONTALLY_MIRRORED_LETTERS.includes(letter)
+
+  try {
+    const saved = localStorage.getItem(`gsl_pose_${norm}`)
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed)) {
+        return {
+          landmarks: parsed,
+          rotX: defaultRotX,
+          rotY: defaultRotY,
+          rotZ: defaultRotZ,
+          isMirrored: defaultMirrored,
+        }
+      }
+      return {
+        landmarks: parsed.landmarks || [],
+        rotX: parsed.rotX ?? defaultRotX,
+        rotY: parsed.rotY ?? defaultRotY,
+        rotZ: parsed.rotZ ?? defaultRotZ,
+        isMirrored: parsed.isMirrored ?? defaultMirrored,
+      }
+    }
+  } catch (e) {
+    // Ignore error
+  }
+
+  const staticOverride = OVERRIDE_LANDMARKS[norm] || OVERRIDE_LANDMARKS[letter]
+
+  if (staticOverride) {
+    if (Array.isArray(staticOverride)) {
+      return {
+        landmarks: staticOverride.map((pt) => [...pt]),
+        rotX: defaultRotX,
+        rotY: defaultRotY,
+        rotZ: defaultRotZ,
+        isMirrored: defaultMirrored,
+      }
+    }
+    return {
+      landmarks: staticOverride.landmarks.map((pt) => [...pt]),
+      rotX: staticOverride.rotX ?? defaultRotX,
+      rotY: staticOverride.rotY ?? defaultRotY,
+      rotZ: staticOverride.rotZ ?? defaultRotZ,
+      isMirrored: staticOverride.isMirrored ?? defaultMirrored,
+    }
+  }
+
+  let landmarks = (gslTemplates as Record<string, number[][]>)[String(idx)] || (gslTemplates as Record<string, number[][]>)['1']
+
+  if (defaultMirrored) {
     landmarks = landmarks.map(([x, y, z]) => [-x, y, z])
   }
 
-  return landmarks
+  return {
+    landmarks: landmarks.map((pt) => [...pt]),
+    rotX: defaultRotX,
+    rotY: defaultRotY,
+    rotZ: defaultRotZ,
+    isMirrored: defaultMirrored,
+  }
 }
 
 export const HandGuide3D: React.FC<HandGuide3DProps> = ({
@@ -115,14 +386,10 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
 }) => {
   const mountRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
+  const isJointDraggingRef = useRef(false)
+  const draggedJointIndexRef = useRef<number | null>(null)
   const previousMousePosition = useRef({ x: 0, y: 0 })
   const normLetter = normalizeLetter(currentLetter)
-
-  // Initial Y rotation set depending on letter (180 degrees default, 0 for M/N/Omega to show front palm)
-  const rotationOffset = useRef({
-    x: normLetter === 'Ω' ? 0.75 : 0.05,
-    y: ['Μ', 'Ν', 'Ω'].includes(normLetter) ? 0 : Math.PI,
-  })
 
   const { i18n } = useTranslation()
   const isGreek = i18n.language && i18n.language.startsWith('el')
@@ -133,17 +400,120 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
   const letterDisplayName = isGreek ? letterInfo.name : letterInfo.enName
   const letterTip = isGreek ? letterInfo.description : letterInfo.fingersTip
 
-  const activeTemplateRef = useRef<number[][]>(getLetterLandmarks(currentLetter))
+  // Pose Editor State
+  const initialConfig = getSavedGestureConfig(currentLetter)
+  const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [selectedJoint, setSelectedJoint] = useState<number>(0)
+  const [landmarksState, setLandmarksState] = useState<number[][]>(initialConfig.landmarks)
+  const [rotX, setRotX] = useState<number>(initialConfig.rotX || 0)
+  const [rotY, setRotY] = useState<number>(initialConfig.rotY || 0)
+  const [rotZ, setRotZ] = useState<number>(initialConfig.rotZ || 0)
+  const [isMirrored, setIsMirrored] = useState<boolean>(Boolean(initialConfig.isMirrored))
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  const activeTemplateRef = useRef<number[][]>(initialConfig.landmarks)
+  const rotationOffset = useRef({ x: initialConfig.rotX || 0, y: initialConfig.rotY || 0, z: initialConfig.rotZ || 0 })
+  const isMirroredRef = useRef<boolean>(isMirrored)
+  const isEditorOpenRef = useRef<boolean>(isEditorOpen)
+  const selectedJointRef = useRef<number>(selectedJoint)
 
   useEffect(() => {
-    const norm = normalizeLetter(currentLetter)
-    activeTemplateRef.current = getLetterLandmarks(currentLetter)
-    if (['Μ', 'Ν', 'Ω'].includes(norm)) {
-      rotationOffset.current = { x: norm === 'Ω' ? 0.75 : 0.05, y: 0 }
-    } else {
-      rotationOffset.current = { x: 0.05, y: Math.PI }
-    }
+    isEditorOpenRef.current = isEditorOpen
+  }, [isEditorOpen])
+
+  useEffect(() => {
+    selectedJointRef.current = selectedJoint
+  }, [selectedJoint])
+
+  useEffect(() => {
+    rotationOffset.current = { x: rotX, y: rotY, z: rotZ }
+  }, [rotX, rotY, rotZ])
+
+  useEffect(() => {
+    isMirroredRef.current = isMirrored
+  }, [isMirrored])
+
+  useEffect(() => {
+    const config = getSavedGestureConfig(currentLetter)
+    activeTemplateRef.current = config.landmarks
+    setLandmarksState(config.landmarks)
+    setRotX(config.rotX || 0)
+    setRotY(config.rotY || 0)
+    setRotZ(config.rotZ || 0)
+    setIsMirrored(Boolean(config.isMirrored))
+    rotationOffset.current = { x: config.rotX || 0, y: config.rotY || 0, z: config.rotZ || 0 }
   }, [currentLetter])
+
+  // Update landmark position via sliders
+  const handleJointChange = (axis: number, val: number) => {
+    const updated = landmarksState.map((pt, i) => {
+      if (i === selectedJoint) {
+        const next = [...pt]
+        next[axis] = val
+        return next
+      }
+      return pt
+    })
+    setLandmarksState(updated)
+    activeTemplateRef.current = updated
+  }
+
+  // Copy Complete Code
+  const handleCopyCode = () => {
+    const codeSnippet =
+      `// Pose Config for '${normLetter}'\n` +
+      `'${normLetter}': {\n` +
+      `  rotX: ${rotX.toFixed(2)},\n` +
+      `  rotY: ${rotY.toFixed(2)},\n` +
+      `  rotZ: ${rotZ.toFixed(2)},\n` +
+      `  isMirrored: ${isMirrored},\n` +
+      `  landmarks: [\n` +
+      landmarksState.map((pt) => `    [${pt.map((n) => n.toFixed(3)).join(', ')}]`).join(',\n') +
+      `\n  ]\n},`
+
+    navigator.clipboard.writeText(codeSnippet)
+    setToastMessage(`Copied full '${normLetter}' gesture code to clipboard!`)
+  }
+
+  // Save Gesture to LocalStorage
+  const handleSaveLocal = () => {
+    try {
+      const payload: CustomGestureConfig = {
+        landmarks: landmarksState,
+        rotX,
+        rotY,
+        rotZ,
+        isMirrored,
+      }
+      localStorage.setItem(`gsl_pose_${normLetter}`, JSON.stringify(payload))
+      setToastMessage(`Saved gesture & orientation for '${normLetter}'!`)
+    } catch (e) {
+      setToastMessage('Failed to save to local storage.')
+    }
+  }
+
+  // Reset Pose
+  const handleResetPose = () => {
+    try {
+      localStorage.removeItem(`gsl_pose_${normLetter}`)
+    } catch (e) {}
+
+    const defaultConfig = getSavedGestureConfig(currentLetter)
+    const resetCopy = defaultConfig.landmarks.map((pt) => [...pt])
+
+    setLandmarksState(resetCopy)
+    activeTemplateRef.current = resetCopy
+    setRotX(defaultConfig.rotX || 0)
+    setRotY(defaultConfig.rotY || 0)
+    setRotZ(defaultConfig.rotZ || 0)
+    setIsMirrored(Boolean(defaultConfig.isMirrored))
+    rotationOffset.current = {
+      x: defaultConfig.rotX || 0,
+      y: defaultConfig.rotY || 0,
+      z: defaultConfig.rotZ || 0,
+    }
+    setToastMessage(`Reset '${normLetter}' to original defaults.`)
+  }
 
   useEffect(() => {
     const container = mountRef.current
@@ -158,7 +528,12 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
     camera.position.set(0, 0, 4.4)
     camera.lookAt(0, 0, 0)
 
-    // 2. High-Quality WebGL Renderer
+    // Raycaster for Direct 3D Landmark Dragging
+    const raycaster = new THREE.Raycaster()
+    const dragPlane = new THREE.Plane()
+    const planeIntersect = new THREE.Vector3()
+
+    // 2. Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(width, height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -169,22 +544,19 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
     container.innerHTML = ''
     container.appendChild(renderer.domElement)
 
-    // 3. Studio Character Lighting matching user's purple clay reference image
+    // 3. Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 2.2)
     scene.add(ambientLight)
 
-    // Primary Key Light (Top Right)
     const keyLight = new THREE.DirectionalLight(0xfff7ed, 3.2)
     keyLight.position.set(5, 8, 8)
     keyLight.castShadow = true
     scene.add(keyLight)
 
-    // Soft Purple Fill Light (Left)
     const fillLight = new THREE.DirectionalLight(0xc084fc, 2.2)
     fillLight.position.set(-6, -2, 5)
     scene.add(fillLight)
 
-    // Electric Cyan & Warm Amber Rim Lights
     const rimLight = new THREE.DirectionalLight(0x00b4d8, 3.0)
     rimLight.position.set(0, -5, -4)
     scene.add(rimLight)
@@ -193,23 +565,22 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
     topRimLight.position.set(0, 7, -3)
     scene.add(topRimLight)
 
-    // 4. Vibrant Electric Cyan Material matching design system
+    // 4. Material
     const handMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x00b4d8,        // Electric Cyan (--color-brand-primary)
-      roughness: 0.22,        // Glossy silicone / vinyl clay surface
+      color: 0x00b4d8,
+      roughness: 0.22,
       metalness: 0.05,
-      clearcoat: 0.55,        // High-end clearcoat shine
+      clearcoat: 0.55,
       clearcoatRoughness: 0.15,
       reflectivity: 0.6,
       side: THREE.DoubleSide,
     })
 
-    // Root Hand Object
     const handGroup = new THREE.Group()
     handGroup.position.set(0, 0, 0)
     scene.add(handGroup)
 
-    // 5. Build Continuous Watertight Procedural Finger Geometries
+    // 5. Build Finger Geometries
     const fingerMeshes: {
       mesh: THREE.Mesh
       geometry: THREE.BufferGeometry
@@ -219,14 +590,13 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
 
     FINGERS_CONFIG.forEach((finger) => {
       const numBones = finger.joints.length - 1
-      const totalRings = numBones * LONG_SEGS_PER_BONE + 1 + 4 // +4 rings for smooth fingertip dome
-      const numVertices = totalRings * RADIAL_SEGS + 1 // +1 for apex tip vertex
+      const totalRings = numBones * LONG_SEGS_PER_BONE + 1 + 4
+      const numVertices = totalRings * RADIAL_SEGS + 1
 
       const positions = new Float32Array(numVertices * 3)
       const normals = new Float32Array(numVertices * 3)
       const indices: number[] = []
 
-      // Generate quad strip indices connecting rings
       for (let r = 0; r < totalRings - 1; r++) {
         const ringStart = r * RADIAL_SEGS
         const nextRingStart = (r + 1) * RADIAL_SEGS
@@ -242,7 +612,6 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
         }
       }
 
-      // Generate tip cap triangle fan
       const apexIdx = numVertices - 1
       const lastRingStart = (totalRings - 1) * RADIAL_SEGS
       for (let i = 0; i < RADIAL_SEGS; i++) {
@@ -256,56 +625,54 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       geometry.setIndex(indices)
 
       const mesh = new THREE.Mesh(geometry, handMaterial)
+      mesh.castShadow = true
+      mesh.receiveShadow = true
       handGroup.add(mesh)
 
       fingerMeshes.push({ mesh, geometry, finger, totalRings })
     })
 
-    // Joint Fillet Pivot Spheres (Smooths out sharp knuckle curls on fists)
+    // Joint Fillet Spheres
     const jointCapMeshes: { mesh: THREE.Mesh; idx: number }[] = []
-    FINGERS_CONFIG.forEach((finger) => {
-      finger.joints.forEach((idx, step) => {
-        const rad = finger.radii[step]
-        const cap = new THREE.Mesh(new THREE.SphereGeometry(rad * 1.02, 5, 5), handMaterial)
-        handGroup.add(cap)
-        jointCapMeshes.push({ mesh: cap, idx })
-      })
+    const allJointIndices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+    allJointIndices.forEach((idx) => {
+      let r = 0.14
+      if ([4, 8, 12, 16, 20].includes(idx)) r = 0.08
+      else if ([3, 7, 11, 15, 19].includes(idx)) r = 0.10
+      else if ([2, 6, 10, 14, 18].includes(idx)) r = 0.13
+      else if ([1, 5, 9, 13, 17].includes(idx)) r = 0.16
+      else if (idx === 0) r = 0.22
+
+      const capMesh = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 16), handMaterial)
+      capMesh.castShadow = true
+      handGroup.add(capMesh)
+      jointCapMeshes.push({ mesh: capMesh, idx })
     })
 
-    // 6. Sculpted Organic Palm Structure
-    // Smooth Rounded Wrist Base
-    const wristDome = new THREE.Mesh(
-      new THREE.SphereGeometry(0.38, 3, 3),
-      handMaterial
-    )
-    wristDome.scale.set(1.15, 0.85, 0.85)
-    handGroup.add(wristDome)
+    // 3D Visual Joint Indicator Spheres (Raycastable Draggable Handles)
+    const jointIndicatorMeshes: { mesh: THREE.Mesh; idx: number }[] = []
+    allJointIndices.forEach((idx) => {
+      const indMat = new THREE.MeshBasicMaterial({
+        color: 0x00ffcc,
+        transparent: true,
+        opacity: 0,
+        depthTest: false,
+      })
+      const indMesh = new THREE.Mesh(new THREE.SphereGeometry(0.065, 16, 16), indMat)
+      indMesh.renderOrder = 999
+      handGroup.add(indMesh)
+      jointIndicatorMeshes.push({ mesh: indMesh, idx })
+    })
 
-    // Fleshy Thenar Pad (Thumb Base Muscle)
-    const thenarMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.35, 3, 3),
-      handMaterial
-    )
-    thenarMesh.scale.set(1.2, 1.2, 0.9)
-    handGroup.add(thenarMesh)
-
-    // Fleshy Hypothenar Pad (Pinky Base Muscle)
-    const hypothenarMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.35, 3, 3),
-      handMaterial
-    )
-    hypothenarMesh.scale.set(1.1, 1.15, 0.85)
-    handGroup.add(hypothenarMesh)
-
-    // Solid Central Palm Slab (Fills the entire center of the palm)
+    // Palm Slabs
     const palmPlateMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.42, 3, 3),
+      new THREE.SphereGeometry(0.42, 12, 12),
       handMaterial
     )
     palmPlateMesh.scale.set(1.25, 1.1, 0.65)
     handGroup.add(palmPlateMesh)
 
-    // Organic Metacarpal Palm Struts (Wrist to Knuckles)
     const metacarpalMeshes: THREE.Mesh[] = []
     const targetKnuckles = [5, 9, 13, 17]
     targetKnuckles.forEach(() => {
@@ -317,9 +684,8 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       metacarpalMeshes.push(strut)
     })
 
-    // Inter-digital Webbing Bridges (Between adjacent fingers)
     const webbingMeshes: THREE.Mesh[] = []
-    const webPairs = [[5, 9], [9, 13], [13, 17], [1, 5]] // includes thumb-index web!
+    const webPairs = [[5, 9], [9, 13], [13, 17], [1, 5]]
     webPairs.forEach(() => {
       const webMesh = new THREE.Mesh(
         new THREE.CylinderGeometry(0.12, 0.12, 1, 14),
@@ -329,14 +695,12 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       webbingMeshes.push(webMesh)
     })
 
-    // Connect Thumb Base to Palm (Landmark 0 to 1)
     const thumbBaseMesh = new THREE.Mesh(
       new THREE.CylinderGeometry(0.16, 0.22, 1, 16),
       handMaterial
     )
     handGroup.add(thumbBaseMesh)
 
-    // Smooth Lerp Positions
     const currentPositions: THREE.Vector3[] = []
     const targetPositions: THREE.Vector3[] = []
     const initialTemplate = activeTemplateRef.current || []
@@ -348,82 +712,142 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       targetPositions.push(pos.clone())
     }
 
-    // Mouse / Touch Drag Rotation Handling
+    // Direct 3D Landmark Mouse Dragging + Camera Orbiting
+    const getNDCCoords = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect()
+      return {
+        x: ((e.clientX - rect.left) / rect.width) * 2 - 1,
+        y: -((e.clientY - rect.top) / rect.height) * 2 + 1,
+      }
+    }
+
     const handleMouseDown = (e: MouseEvent) => {
+      const ndc = getNDCCoords(e)
+
+      if (isEditorOpenRef.current) {
+        raycaster.setFromCamera(new THREE.Vector2(ndc.x, ndc.y), camera)
+        const intersects = raycaster.intersectObjects(jointIndicatorMeshes.map((m) => m.mesh))
+
+        if (intersects.length > 0) {
+          const hitObj = intersects[0].object
+          const hit = jointIndicatorMeshes.find((m) => m.mesh === hitObj)
+          if (hit) {
+            isJointDraggingRef.current = true
+            draggedJointIndexRef.current = hit.idx
+            setSelectedJoint(hit.idx)
+
+            // Create Drag Plane facing the camera
+            const jointWorldPos = new THREE.Vector3()
+            hitObj.getWorldPosition(jointWorldPos)
+            const camDir = new THREE.Vector3()
+            camera.getWorldDirection(camDir).negate()
+            dragPlane.setFromNormalAndCoplanarPoint(camDir, jointWorldPos)
+
+            container.style.cursor = 'grabbing'
+            return
+          }
+        }
+      }
+
       isDraggingRef.current = true
       previousMousePosition.current = { x: e.clientX, y: e.clientY }
     }
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current) return
-      const deltaX = e.clientX - previousMousePosition.current.x
-      const deltaY = e.clientY - previousMousePosition.current.y
+      const ndc = getNDCCoords(e)
 
-      rotationOffset.current.y += deltaX * 0.012
-      rotationOffset.current.x += deltaY * 0.012
-      rotationOffset.current.x = Math.max(-1.4, Math.min(1.4, rotationOffset.current.x))
+      // Hover feedback when Pose Editor is open
+      if (isEditorOpenRef.current && !isJointDraggingRef.current && !isDraggingRef.current) {
+        raycaster.setFromCamera(new THREE.Vector2(ndc.x, ndc.y), camera)
+        const intersects = raycaster.intersectObjects(jointIndicatorMeshes.map((m) => m.mesh))
+        container.style.cursor = intersects.length > 0 ? 'pointer' : 'grab'
+      }
 
-      previousMousePosition.current = { x: e.clientX, y: e.clientY }
+      // Handle Direct 3D Joint Dragging
+      if (isJointDraggingRef.current && draggedJointIndexRef.current !== null) {
+        raycaster.setFromCamera(new THREE.Vector2(ndc.x, ndc.y), camera)
+        if (raycaster.ray.intersectPlane(dragPlane, planeIntersect)) {
+          // Convert 3D World position to local hand space
+          const localPos = planeIntersect.clone()
+          handGroup.worldToLocal(localPos)
+
+          const idx = draggedJointIndexRef.current
+          const newPt = [
+            Number(localPos.x.toFixed(3)),
+            Number(localPos.y.toFixed(3)),
+            Number(localPos.z.toFixed(3)),
+          ]
+
+          const template = activeTemplateRef.current || []
+          const updated = template.map((pt, i) => (i === idx ? newPt : pt))
+          activeTemplateRef.current = updated
+          setLandmarksState(updated)
+        }
+        return
+      }
+
+      // Handle Hand Orbit Rotation
+      if (isDraggingRef.current) {
+        const deltaX = e.clientX - previousMousePosition.current.x
+        const deltaY = e.clientY - previousMousePosition.current.y
+
+        rotationOffset.current.y += deltaX * 0.012
+        rotationOffset.current.x += deltaY * 0.012
+        rotationOffset.current.x = Math.max(-1.8, Math.min(1.8, rotationOffset.current.x))
+
+        setRotX(Number(rotationOffset.current.x.toFixed(2)))
+        setRotY(Number(rotationOffset.current.y.toFixed(2)))
+
+        previousMousePosition.current = { x: e.clientX, y: e.clientY }
+      }
     }
 
     const handleMouseUp = () => {
       isDraggingRef.current = false
+      isJointDraggingRef.current = false
+      draggedJointIndexRef.current = null
+      container.style.cursor = 'grab'
     }
 
     container.addEventListener('mousedown', handleMouseDown)
     window.addEventListener('mousemove', handleMouseMove)
     window.addEventListener('mouseup', handleMouseUp)
 
-    // Touch support for mobile / tablets
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        isDraggingRef.current = true
-        previousMousePosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-      }
-    }
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isDraggingRef.current || e.touches.length === 0) return
-      const deltaX = e.touches[0].clientX - previousMousePosition.current.x
-      const deltaY = e.touches[0].clientY - previousMousePosition.current.y
-
-      rotationOffset.current.y += deltaX * 0.012
-      rotationOffset.current.x += deltaY * 0.012
-      rotationOffset.current.x = Math.max(-1.4, Math.min(1.4, rotationOffset.current.x))
-
-      previousMousePosition.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-    }
-    const handleTouchEnd = () => {
-      isDraggingRef.current = false
+    const handleResize = () => {
+      if (!container) return
+      const w = container.clientWidth
+      const h = container.clientHeight
+      camera.aspect = w / h
+      camera.updateProjectionMatrix()
+      renderer.setSize(w, h)
     }
 
-    container.addEventListener('touchstart', handleTouchStart, { passive: true })
-    window.addEventListener('touchmove', handleTouchMove, { passive: true })
-    window.addEventListener('touchend', handleTouchEnd)
+    window.addEventListener('resize', handleResize)
 
-    // 7. Animation & Procedural Single-Surface Skinning Loop
+    // Animation Loop
     let animId: number
     const clock = new THREE.Clock()
-    const upVector = new THREE.Vector3(0, 1, 0)
 
     const animate = () => {
       animId = requestAnimationFrame(animate)
       const elapsedTime = clock.getElapsedTime()
 
-      // Gentle breathing float
       const floatY = Math.sin(elapsedTime * 2.2) * 0.05
       handGroup.position.y = floatY
 
-      // Horizontally mirror hand guide to match mirrored selfie webcam view
-      const mirrorScale = selectedHand === 'right' ? -1 : 1
-      handGroup.scale.set(mirrorScale, 1, 1)
+      // Flip / Mirror scale logic
+      const baseMirrorScale = selectedHand === 'right' ? -1 : 1
+      const localMirrorScale = isMirroredRef.current ? -1 : 1
+      handGroup.scale.set(baseMirrorScale * localMirrorScale, 1, 1)
 
-      // Drag Rotation
+      // Smooth Rotation
       const targetRotX = rotationOffset.current.x
       const targetRotY = rotationOffset.current.y
-      handGroup.rotation.x += (targetRotX - handGroup.rotation.x) * 0.12
-      handGroup.rotation.y += (targetRotY - handGroup.rotation.y) * 0.12
+      const targetRotZ = rotationOffset.current.z || 0
+      handGroup.rotation.x += (targetRotX - handGroup.rotation.x) * 0.15
+      handGroup.rotation.y += (targetRotY - handGroup.rotation.y) * 0.15
+      handGroup.rotation.z += (targetRotZ - handGroup.rotation.z) * 0.15
 
-      // Interpolate landmark targets smoothly
       const template = activeTemplateRef.current || []
       for (let i = 0; i < 21; i++) {
         if (template[i]) {
@@ -433,23 +857,37 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       }
 
       for (let i = 0; i < 21; i++) {
-        currentPositions[i].lerp(targetPositions[i], 0.16)
+        currentPositions[i].lerp(targetPositions[i], 0.25)
       }
 
-      // Update joint fillet positions
       jointCapMeshes.forEach(({ mesh, idx }) => {
         if (currentPositions[idx]) {
           mesh.position.copy(currentPositions[idx])
         }
       })
 
-      // Base Landmark References
+      // 3D Pose Editor Indicators Update
+      jointIndicatorMeshes.forEach(({ mesh, idx }) => {
+        if (currentPositions[idx]) {
+          mesh.position.copy(currentPositions[idx])
+        }
+        const mat = mesh.material as THREE.MeshBasicMaterial
+        if (isEditorOpenRef.current) {
+          const isSelected = selectedJointRef.current === idx
+          mat.opacity = isSelected ? 0.95 : 0.55
+          mat.color.setHex(isSelected ? 0xffb703 : 0x00ffcc)
+          mesh.scale.setScalar(isSelected ? 1.6 : 1.0)
+        } else {
+          mat.opacity = 0
+        }
+      })
+
       const pWrist = currentPositions[0]
       const pThumbBase = currentPositions[1]
       const pMiddleKnuckle = currentPositions[9]
       const pPinkyKnuckle = currentPositions[17]
 
-      // A. Update Deformable Finger Loft Meshes
+      // Update Finger Meshes
       fingerMeshes.forEach(({ geometry, finger }) => {
         const posAttr = geometry.getAttribute('position') as THREE.BufferAttribute
         const posArr = posAttr.array as Float32Array
@@ -457,7 +895,6 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
         const joints = finger.joints.map((idx) => currentPositions[idx])
         const numBones = joints.length - 1
 
-        // Build continuous center spline points along the finger
         const spinePoints: { pos: THREE.Vector3; tangent: THREE.Vector3; radius: number }[] = []
 
         for (let b = 0; b < numBones; b++) {
@@ -475,7 +912,6 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           }
         }
 
-        // Add final tip joint
         const lastJoint = joints[joints.length - 1]
         const prevJoint = joints[joints.length - 2]
         const tipDir = new THREE.Vector3().subVectors(lastJoint, prevJoint).normalize()
@@ -483,7 +919,6 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
 
         spinePoints.push({ pos: lastJoint.clone(), tangent: tipDir, radius: tipRadius })
 
-        // Add rounded hemisphere tip dome rings
         const domeSteps = 4
         for (let d = 1; d <= domeSteps; d++) {
           const phi = (d / domeSteps) * (Math.PI / 2)
@@ -493,150 +928,140 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           spinePoints.push({ pos: domeCenter, tangent: tipDir, radius: Math.max(ringRad, 0.01) })
         }
 
-        // Generate radial vertices around each spine point
         let vIdx = 0
         let refUp = new THREE.Vector3(0, 0, 1)
 
         spinePoints.forEach((spine) => {
-          let normal = new THREE.Vector3().crossVectors(spine.tangent, refUp).normalize()
-          if (normal.lengthSq() < 0.1) {
-            refUp = new THREE.Vector3(0, 1, 0)
-            normal = new THREE.Vector3().crossVectors(spine.tangent, refUp).normalize()
+          const T = spine.tangent.clone()
+          let N = new THREE.Vector3().crossVectors(T, refUp).normalize()
+          if (N.lengthSq() < 0.001) {
+            refUp = new THREE.Vector3(1, 0, 0)
+            N = new THREE.Vector3().crossVectors(T, refUp).normalize()
           }
-          const binormal = new THREE.Vector3().crossVectors(spine.tangent, normal).normalize()
+          const B = new THREE.Vector3().crossVectors(N, T).normalize()
+          refUp = B.clone()
 
           for (let i = 0; i < RADIAL_SEGS; i++) {
             const angle = (i / RADIAL_SEGS) * Math.PI * 2
             const cos = Math.cos(angle)
             const sin = Math.sin(angle)
 
-            const vx = spine.pos.x + spine.radius * (cos * normal.x + sin * binormal.x)
-            const vy = spine.pos.y + spine.radius * (cos * normal.y + sin * binormal.y)
-            const vz = spine.pos.z + spine.radius * (cos * normal.z + sin * binormal.z)
+            const normal = new THREE.Vector3().addVectors(
+              N.clone().multiplyScalar(cos),
+              B.clone().multiplyScalar(sin)
+            ).normalize()
 
-            posArr[vIdx * 3 + 0] = vx
-            posArr[vIdx * 3 + 1] = vy
-            posArr[vIdx * 3 + 2] = vz
+            const vertex = new THREE.Vector3().addVectors(
+              spine.pos,
+              normal.clone().multiplyScalar(spine.radius)
+            )
+
+            posArr[vIdx * 3] = vertex.x
+            posArr[vIdx * 3 + 1] = vertex.y
+            posArr[vIdx * 3 + 2] = vertex.z
+
             vIdx++
           }
         })
 
-        // Apex tip point
         const tipApex = new THREE.Vector3().addVectors(lastJoint, tipDir.clone().multiplyScalar(tipRadius * 1.05))
-        posArr[vIdx * 3 + 0] = tipApex.x
+        posArr[vIdx * 3] = tipApex.x
         posArr[vIdx * 3 + 1] = tipApex.y
         posArr[vIdx * 3 + 2] = tipApex.z
 
-        posAttr.needsUpdate = true
         geometry.computeVertexNormals()
+        posAttr.needsUpdate = true
       })
 
-      // B. Update Palm Structures
-      if (pWrist) {
-        if (wristDome) {
-          wristDome.position.copy(pWrist)
-        }
+      // Palm Plate
+      const palmCenter = new THREE.Vector3().addVectors(pWrist, pMiddleKnuckle).multiplyScalar(0.5)
+      palmPlateMesh.position.copy(palmCenter)
+      const palmDir = new THREE.Vector3().subVectors(pMiddleKnuckle, pWrist).normalize()
+      const palmUp = new THREE.Vector3().crossVectors(
+        palmDir,
+        new THREE.Vector3().subVectors(pPinkyKnuckle, pWrist)
+      ).normalize()
 
-        if (palmPlateMesh && pMiddleKnuckle) {
-          const palmCenter = new THREE.Vector3().addVectors(pWrist, pMiddleKnuckle).multiplyScalar(0.5)
-          palmPlateMesh.position.copy(palmCenter)
-        }
+      const palmRotMat = new THREE.Matrix4().makeBasis(
+        new THREE.Vector3().crossVectors(palmUp, palmDir).normalize(),
+        palmDir,
+        palmUp
+      )
+      palmPlateMesh.rotation.setFromRotationMatrix(palmRotMat)
 
-        if (thenarMesh && pThumbBase) {
-          const thenarPos = new THREE.Vector3().addVectors(pWrist, pThumbBase).multiplyScalar(0.5)
-          thenarMesh.position.copy(thenarPos).add(new THREE.Vector3(-0.06, 0, 0.04))
-        }
+      targetKnuckles.forEach((kIdx, i) => {
+        const kPos = currentPositions[kIdx]
+        const strut = metacarpalMeshes[i]
+        const mid = new THREE.Vector3().addVectors(pWrist, kPos).multiplyScalar(0.5)
+        const dist = pWrist.distanceTo(kPos)
+        strut.position.copy(mid)
+        strut.scale.set(1, dist, 1)
 
-        if (hypothenarMesh && pPinkyKnuckle) {
-          const hypPos = new THREE.Vector3().addVectors(pWrist, pPinkyKnuckle).multiplyScalar(0.5)
-          hypothenarMesh.position.copy(hypPos).add(new THREE.Vector3(0.06, 0, 0.04))
-        }
+        const dir = new THREE.Vector3().subVectors(kPos, pWrist).normalize()
+        const rotMat = new THREE.Matrix4().makeBasis(
+          new THREE.Vector3(1, 0, 0),
+          dir,
+          new THREE.Vector3(0, 0, 1)
+        )
+        strut.rotation.setFromRotationMatrix(rotMat)
+      })
 
-        if (thumbBaseMesh && pThumbBase) {
-          const midpoint = new THREE.Vector3().addVectors(pWrist, pThumbBase).multiplyScalar(0.5)
-          const distance = pWrist.distanceTo(pThumbBase)
-          thumbBaseMesh.position.copy(midpoint)
-          thumbBaseMesh.scale.set(1, Math.max(distance, 0.01), 1)
-          const direction = new THREE.Vector3().subVectors(pThumbBase, pWrist).normalize()
-          thumbBaseMesh.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(upVector, direction))
-        }
+      webPairs.forEach(([aIdx, bIdx], i) => {
+        const pA = currentPositions[aIdx]
+        const pB = currentPositions[bIdx]
+        const webMesh = webbingMeshes[i]
+        const mid = new THREE.Vector3().addVectors(pA, pB).multiplyScalar(0.5)
+        const dist = pA.distanceTo(pB)
+        webMesh.position.copy(mid)
+        webMesh.scale.set(1, dist, 1)
 
-        // Metacarpal Struts (Wrist 0 to Knuckles 5, 9, 13, 17)
-        targetKnuckles.forEach((kIdx, sIdx) => {
-          const pK = currentPositions[kIdx]
-          const strut = metacarpalMeshes[sIdx]
-          if (pK && strut) {
-            const midpoint = new THREE.Vector3().addVectors(pWrist, pK).multiplyScalar(0.5)
-            const distance = pWrist.distanceTo(pK)
-            strut.position.copy(midpoint)
-            strut.scale.set(1, Math.max(distance, 0.01), 1)
-            const direction = new THREE.Vector3().subVectors(pK, pWrist).normalize()
-            strut.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(upVector, direction))
-          }
-        })
+        const dir = new THREE.Vector3().subVectors(pB, pA).normalize()
+        const rotMat = new THREE.Matrix4().makeBasis(
+          new THREE.Vector3(1, 0, 0),
+          dir,
+          new THREE.Vector3(0, 0, 1)
+        )
+        webMesh.rotation.setFromRotationMatrix(rotMat)
+      })
 
-        // Webbing bridges between Index-Middle (5-9), Middle-Ring (9-13), Ring-Pinky (13-17), Thumb-Index (1-5)
-        webPairs.forEach(([iA, iB], wIdx) => {
-          const pA = currentPositions[iA]
-          const pB = currentPositions[iB]
-          const wMesh = webbingMeshes[wIdx]
-          if (pA && pB && wMesh) {
-            const wCenter = new THREE.Vector3().addVectors(pA, pB).multiplyScalar(0.5)
-            const wDist = pA.distanceTo(pB)
-            wMesh.position.copy(wCenter)
-            wMesh.scale.set(1, Math.max(wDist, 0.01), 1)
-            const wDir = new THREE.Vector3().subVectors(pB, pA).normalize()
-            wMesh.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(upVector, wDir))
-          }
-        })
-      }
+      const tMid = new THREE.Vector3().addVectors(pWrist, pThumbBase).multiplyScalar(0.5)
+      const tDist = pWrist.distanceTo(pThumbBase)
+      thumbBaseMesh.position.copy(tMid)
+      thumbBaseMesh.scale.set(1, tDist, 1)
+      const tDir = new THREE.Vector3().subVectors(pThumbBase, pWrist).normalize()
+      const tRotMat = new THREE.Matrix4().makeBasis(
+        new THREE.Vector3(1, 0, 0),
+        tDir,
+        new THREE.Vector3(0, 0, 1)
+      )
+      thumbBaseMesh.rotation.setFromRotationMatrix(tRotMat)
 
       renderer.render(scene, camera)
     }
 
     animate()
 
-    const handleResize = () => {
-      if (!container) return
-      const w = container.clientWidth || window.innerWidth / 2
-      const h = container.clientHeight || window.innerHeight
-      const aspect = w / h
-      camera.aspect = aspect
-      // Dynamic Responsive FOV: expands camera field of view on narrow aspect ratios (e.g. mobile portrait)
-      camera.fov = aspect < 1.0 ? Math.min(65, 40 / aspect) : 40
-      camera.updateProjectionMatrix()
-      renderer.setSize(w, h)
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    }
-
-    handleResize()
-
-    const resizeObserver = new ResizeObserver(handleResize)
-    resizeObserver.observe(container)
-    window.addEventListener('resize', handleResize)
-
     return () => {
       cancelAnimationFrame(animId)
       container.removeEventListener('mousedown', handleMouseDown)
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
-      container.removeEventListener('touchstart', handleTouchStart)
-      window.removeEventListener('touchmove', handleTouchMove)
-      window.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('resize', handleResize)
-      resizeObserver.disconnect()
       renderer.dispose()
     }
   }, [selectedHand])
 
   const resetRotation = () => {
     const norm = normalizeLetter(currentLetter)
-    if (['Μ', 'Ν'].includes(norm)) {
-      rotationOffset.current = { x: 0.05, y: 0 }
-    } else {
-      rotationOffset.current = { x: 0.05, y: Math.PI }
-    }
+    const defaultRotX = norm === 'Ω' ? 0.75 : 0.05
+    const defaultRotY = ['Μ', 'Ν', 'Ω'].includes(norm) ? 0 : Math.PI
+    setRotX(defaultRotX)
+    setRotY(defaultRotY)
+    setRotZ(0)
+    rotationOffset.current = { x: defaultRotX, y: defaultRotY, z: 0 }
   }
+
+  const activeJointCoords = landmarksState[selectedJoint] || [0, 0, 0]
 
   return (
     <Box
@@ -645,14 +1070,13 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
         width: '100%',
         height: '100%',
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         background: 'radial-gradient(circle at center, rgba(0, 180, 216, 0.18) 0%, #1A1D28 100%)',
         overflow: 'hidden',
       }}
     >
-      {/* Full-bleed 3D Canvas Mount */}
+      {/* 3D Canvas Mount */}
       <Box
         ref={mountRef}
         sx={{
@@ -690,6 +1114,35 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
         </Typography>
       </Box>
 
+      {/* Direct Dragging Visual Mode Banner (Top Center) */}
+      {isEditorOpen && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 20,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(0, 180, 216, 0.90)',
+            backdropFilter: 'blur(12px)',
+            color: '#FFFFFF',
+            px: 2.5,
+            py: 0.8,
+            borderRadius: 20,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.2,
+            boxShadow: '0 8px 24px rgba(0, 180, 216, 0.4)',
+            zIndex: 3,
+            pointerEvents: 'none',
+          }}
+        >
+          <TouchAppIcon fontSize='small' />
+          <Typography variant='caption' sx={{ fontWeight: 800, fontSize: '0.85rem' }}>
+            Direct 3D Drag Active: Click & drag any sphere to shape the hand!
+          </Typography>
+        </Box>
+      )}
+
       {/* Interactive Controls Overlay (Bottom Right) */}
       <Box
         sx={{
@@ -706,6 +1159,15 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           zIndex: 2,
         }}
       >
+        <Tooltip title={isEditorOpen ? 'Close 3D Pose Editor' : 'Open 3D Pose Editor 🛠️'}>
+          <IconButton
+            onClick={() => setIsEditorOpen(!isEditorOpen)}
+            size='small'
+            sx={{ color: isEditorOpen ? '#FFB703' : '#E2E8F0' }}
+          >
+            <TuneIcon fontSize='small' />
+          </IconButton>
+        </Tooltip>
         {onHandToggle && (
           <Tooltip title={isGreek ? `Αλλαγή σε ${selectedHand === 'right' ? 'Αριστερό' : 'Δεξί'} Χέρι` : `Switch to ${selectedHand === 'right' ? 'Left' : 'Right'} Hand`}>
             <IconButton onClick={onHandToggle} size='small' sx={{ color: '#E2E8F0' }}>
@@ -726,7 +1188,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           position: 'absolute',
           bottom: { xs: 10, sm: 20 },
           left: { xs: 10, sm: 20 },
-          maxWidth: { xs: '65%', sm: '75%' },
+          maxWidth: { xs: '65%', sm: '50%' },
           background: 'rgba(26, 29, 40, 0.90)',
           backdropFilter: 'blur(12px)',
           px: { xs: 1.4, sm: 2.2 },
@@ -740,6 +1202,228 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           💡 {letterTip}
         </Typography>
       </Box>
+
+      {/* 3D Pose Editor Drawer */}
+      <Drawer
+        anchor='right'
+        open={isEditorOpen}
+        onClose={() => setIsEditorOpen(false)}
+        PaperProps={{
+          sx: {
+            width: { xs: '100%', sm: 400 },
+            background: 'rgba(15, 23, 42, 0.96)',
+            backdropFilter: 'blur(20px)',
+            color: '#F8FAFC',
+            p: 2.5,
+            borderLeft: '1px solid rgba(255, 255, 255, 0.12)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            overflowY: 'auto',
+          },
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <TuneIcon sx={{ color: '#00B4D8' }} />
+            <Typography variant='h6' sx={{ fontWeight: 800, color: '#00B4D8' }}>
+              3D Gesture Designer ({normLetter})
+            </Typography>
+          </Box>
+          <IconButton onClick={() => setIsEditorOpen(false)} size='small' sx={{ color: '#94A3B8' }}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        {/* 1. Joint Picker & Coordinate Sliders */}
+        <Box sx={{ background: 'rgba(255,255,255,0.03)', p: 1.5, borderRadius: 3, border: '1px solid rgba(255,255,255,0.08)' }}>
+          <Typography variant='subtitle2' sx={{ color: '#00B4D8', fontWeight: 800, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <TouchAppIcon fontSize='small' /> Joint Position (3D Drag & Sliders)
+          </Typography>
+
+          <FormControl fullWidth size='small' sx={{ mb: 1.5 }}>
+            <InputLabel sx={{ color: '#94A3B8' }}>Selected Landmark Joint</InputLabel>
+            <Select
+              value={selectedJoint}
+              label='Selected Landmark Joint'
+              onChange={(e) => setSelectedJoint(Number(e.target.value))}
+              sx={{
+                color: '#F8FAFC',
+                '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#00B4D8' },
+              }}
+            >
+              {Object.entries(LANDMARK_NAMES).map(([idx, name]) => (
+                <MenuItem key={idx} value={Number(idx)}>
+                  Joint {idx}: {name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Chip
+            label={`Editing Joint ${selectedJoint}: ${LANDMARK_NAMES[selectedJoint] || ''}`}
+            sx={{ background: 'rgba(0, 180, 216, 0.15)', color: '#00B4D8', fontWeight: 700, width: '100%', mb: 1.5 }}
+          />
+
+          <Box sx={{ px: 1 }}>
+            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+              X Coordinate: {activeJointCoords[0].toFixed(3)}
+            </Typography>
+            <Slider
+              min={-1.5}
+              max={1.5}
+              step={0.01}
+              value={activeJointCoords[0]}
+              onChange={(_, val) => handleJointChange(0, val as number)}
+              sx={{ color: '#00B4D8' }}
+            />
+          </Box>
+
+          <Box sx={{ px: 1 }}>
+            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+              Y Coordinate: {activeJointCoords[1].toFixed(3)}
+            </Typography>
+            <Slider
+              min={-1.5}
+              max={1.5}
+              step={0.01}
+              value={activeJointCoords[1]}
+              onChange={(_, val) => handleJointChange(1, val as number)}
+              sx={{ color: '#10B981' }}
+            />
+          </Box>
+
+          <Box sx={{ px: 1 }}>
+            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+              Z Coordinate: {activeJointCoords[2].toFixed(3)}
+            </Typography>
+            <Slider
+              min={-1.5}
+              max={1.5}
+              step={0.01}
+              value={activeJointCoords[2]}
+              onChange={(_, val) => handleJointChange(2, val as number)}
+              sx={{ color: '#FBBF24' }}
+            />
+          </Box>
+        </Box>
+
+        {/* 2. Orientation & Mirror Controls */}
+        <Box sx={{ background: 'rgba(255,255,255,0.03)', p: 1.5, borderRadius: 3, border: '1px solid rgba(255,255,255,0.08)' }}>
+          <Typography variant='subtitle2' sx={{ color: '#FFB703', fontWeight: 800, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ThreeDRotationIcon fontSize='small' /> Starting Orientation & Flip
+          </Typography>
+
+          <Box sx={{ px: 1, mb: 1 }}>
+            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+              X Rotation (Pitch): {(rotX * (180 / Math.PI)).toFixed(0)}°
+            </Typography>
+            <Slider
+              min={-Math.PI}
+              max={Math.PI}
+              step={0.02}
+              value={rotX}
+              onChange={(_, val) => setRotX(val as number)}
+              sx={{ color: '#FFB703' }}
+            />
+          </Box>
+
+          <Box sx={{ px: 1, mb: 1 }}>
+            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+              Y Rotation (Yaw): {(rotY * (180 / Math.PI)).toFixed(0)}°
+            </Typography>
+            <Slider
+              min={-Math.PI * 1.5}
+              max={Math.PI * 1.5}
+              step={0.02}
+              value={rotY}
+              onChange={(_, val) => setRotY(val as number)}
+              sx={{ color: '#FFB703' }}
+            />
+          </Box>
+
+          <Box sx={{ px: 1, mb: 1 }}>
+            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+              Z Rotation (Roll): {(rotZ * (180 / Math.PI)).toFixed(0)}°
+            </Typography>
+            <Slider
+              min={-Math.PI}
+              max={Math.PI}
+              step={0.02}
+              value={rotZ}
+              onChange={(_, val) => setRotZ(val as number)}
+              sx={{ color: '#FFB703' }}
+            />
+          </Box>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isMirrored}
+                onChange={(e) => setIsMirrored(e.target.checked)}
+                color='primary'
+              />
+            }
+            label={
+              <Typography variant='body2' sx={{ fontWeight: 700, color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                <SwapHorizIcon fontSize='small' /> Flip Hand Horizontal (Mirror)
+              </Typography>
+            }
+            sx={{ mt: 0.5, ml: 0.2 }}
+          />
+        </Box>
+
+        {/* Action Buttons */}
+        <Box sx={{ mt: 'auto', display: 'flex', flexDirection: 'column', gap: 1.2 }}>
+          <Button
+            variant='contained'
+            startIcon={<SaveIcon />}
+            onClick={handleSaveLocal}
+            sx={{
+              backgroundColor: '#10B981',
+              fontWeight: 800,
+              py: 1.2,
+              '&:hover': { backgroundColor: '#059669' },
+            }}
+          >
+            Save Complete Gesture to App
+          </Button>
+          <Button
+            variant='outlined'
+            startIcon={<ContentCopyIcon />}
+            onClick={handleCopyCode}
+            sx={{
+              borderColor: '#00B4D8',
+              color: '#00B4D8',
+              fontWeight: 700,
+              '&:hover': { borderColor: '#38BDF8', backgroundColor: 'rgba(0,180,216,0.1)' },
+            }}
+          >
+            Copy Full Gesture Code Snippet
+          </Button>
+          <Button
+            variant='text'
+            startIcon={<RestartAltIcon />}
+            onClick={handleResetPose}
+            sx={{ color: '#EF4444', fontWeight: 700 }}
+          >
+            Reset Gesture to Default
+          </Button>
+        </Box>
+      </Drawer>
+
+      {/* Toast Notification */}
+      <Snackbar
+        open={Boolean(toastMessage)}
+        autoHideDuration={4000}
+        onClose={() => setToastMessage(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity='success' onClose={() => setToastMessage(null)} sx={{ fontWeight: 700 }}>
+          {toastMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }
