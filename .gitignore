@@ -3,23 +3,39 @@ logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies & Build Output
 node_modules
 build
 dist
 dist-ssr
-*.local
-
-# production
 /build
 /build-dev
 /build-prod
 /build-qa
 
-# Editor directories and files
+# Environment & Secrets (CRITICAL SECURITY)
+.env
+.env.*
+!.env.example
+
+# Python Caches & ML Artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.h5
+*.hdf5
+*.pkl
+*.npy
+*.csv
+best_model.h5
+modelisimo/models/*.h5
+modelisimo/data/processed/
+
+# Editor & OS Files
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -31,15 +47,6 @@ dist-ssr
 *.sw?
 .antigravity/*
 
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-
-#model
-modelisimo/src/data/__pychache__/*
-modelisimo/src/evaluation/__pychache__/*
-modelisimo/src/model/__pychache__/*
+# Testing & Quality Output
+eslint-report.json
+coverage/

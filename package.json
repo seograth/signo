@@ -40,7 +40,6 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.185.4",
-    "axios": "^1.7.7",
     "canvas-confetti": "^1.9.4",
     "comlink": "^4.4.2",
     "env-cmd": "^10.1.0",

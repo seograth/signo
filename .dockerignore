@@ -1,0 +1,25 @@
+# Docker Build Ignore File
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+node_modules
+build
+dist
+coverage
+eslint-report.json
+*.log
+
+# Python Caches & Model Artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.h5
+*.npy
+*.pkl
+*.csv
+best_model.h5
+modelisimo/models/*.h5
+modelisimo/data/processed/
