@@ -4,6 +4,7 @@
 
 [![Build Status](https://img.shields.io/badge/build-passing-06D6A0.svg?style=for-the-badge&logo=github-actions)](https://github.com/seograth/signo)
 [![Accessibility WCAG AAA](https://img.shields.io/badge/accessibility-WCAG%20AAA-00B4D8.svg?style=for-the-badge&logo=w3c)](https://www.w3.org/TR/WCAG21/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
 ---
 
