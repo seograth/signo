@@ -4,11 +4,9 @@ Thank you to everyone who has contributed to **Signo**! Signo is an open-source 
 
 ---
 
-## 🏆 Core Maintainer & Lead Architect
+## 🏆 Core Maintainer
 
-- **(@seograth)** — Project Founder, Computer Vision Lead & Accessibility Architect
-  - [GitHub Profile](https://github.com/seograth)
-
+- **(@seograth)**
 ---
 
 ## 🤝 Community Contributors
