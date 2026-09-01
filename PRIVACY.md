@@ -15,8 +15,8 @@ Signo is committed to protecting user privacy, biometric security, and camera st
 
 ---
 
-## 2. No Analytics Tracking & Telemetry
-Signo contains **zero third-party trackers, analytics scripts (e.g., Google Analytics, Mixpanel), session recording tools, or telemetry SDKs**. The application operates completely offline once static assets are loaded in your browser.
+## 2. Privacy-Friendly Site Analytics
+Signo utilizes **Vercel Web Analytics** for aggregate, cookieless, privacy-preserving performance monitoring (e.g. total pageviews, device country). Vercel Web Analytics **never collects cookies, personal identifiers, camera feeds, or biometric data**.
 
 ---
 

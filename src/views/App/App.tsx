@@ -1,5 +1,6 @@
 import { Box } from '@mui/material'
 import { Routes, Route, Outlet, useLocation } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import Home from '../Home'
 import NotFound from '../NotFound'
 import Header from '../Header'
@@ -48,6 +49,7 @@ export default function App() {
         </Box>
         <Outlet />
         <AlertMessage />
+        <Analytics />
       </AlertsProvider>
     </Box>
   )
