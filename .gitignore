@@ -50,3 +50,4 @@ modelisimo/data/processed/
 # Testing & Quality Output
 eslint-report.json
 coverage/
+.vercel

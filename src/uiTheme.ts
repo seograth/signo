@@ -127,6 +127,14 @@ const theme = createTheme({
         },
       },
     },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontWeight: 700,
+        },
+      },
+    },
     MuiAppBar: {
       styleOverrides: {
         root: {
