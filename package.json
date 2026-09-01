@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "vite",
+    "dev": "vite",
+    "dev:editor": "vite --mode dev_editor",
     "test": "vitest run",
     "build": "tsc && vite build",
     "preview": "vite preview",

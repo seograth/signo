@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { Box, Typography, IconButton, Tooltip, Button, LinearProgress } from '@mui/material'
+import { alpha, useTheme } from '@mui/material/styles'
 import VideocamIcon from '@mui/icons-material/Videocam'
 import VideocamOffIcon from '@mui/icons-material/VideocamOff'
 import FlipCameraIosIcon from '@mui/icons-material/FlipCameraIos'
@@ -36,6 +37,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
   targetLetter,
   isPaused = false,
 }) => {
+  const theme = useTheme()
   const { t } = useTranslation()
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -230,7 +232,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
   const isProcessingRef = useRef<boolean>(false)
 
-  // Process Video Frame Loop with Processing Lock Guard
+  // Process Video Frame Loop with Non-Blocking ImageBitmap Transfers
   useEffect(() => {
     let isActive = true
 
@@ -248,11 +250,22 @@ export const CameraView: React.FC<CameraViewProps> = ({
 
         if (ctx && handsWorkerRef.current) {
           isProcessingRef.current = true
+          let frameSource: ImageBitmap | HTMLVideoElement = video
           try {
-            await handsWorkerRef.current.send({ image: video })
+            if (typeof createImageBitmap !== 'undefined') {
+              try {
+                frameSource = await createImageBitmap(video)
+              } catch {
+                frameSource = video
+              }
+            }
+            await handsWorkerRef.current.send({ image: frameSource })
           } catch {
             // Frame dropped, continue
           } finally {
+            if (frameSource !== video && 'close' in frameSource) {
+              (frameSource as ImageBitmap).close()
+            }
             isProcessingRef.current = false
           }
         }
@@ -374,8 +387,8 @@ export const CameraView: React.FC<CameraViewProps> = ({
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
-        background: '#1A1D28',
-        borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
+        background: theme.palette.background.default,
+        borderLeft: `1px solid ${theme.palette.divider}`,
       }}
     >
       {/* Full-bleed Video Feed */}
@@ -393,7 +406,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
           objectFit: 'cover',
           transform: videoTransform,
           transformOrigin: 'center center',
-          background: '#1A1D28',
+          background: theme.palette.background.default,
           filter: 'brightness(0.50) contrast(1.20)',
           display: cameraActive ? 'block' : 'none',
         }}
@@ -419,8 +432,8 @@ export const CameraView: React.FC<CameraViewProps> = ({
       {/* Camera Off State */}
       {!cameraActive && (
         <Box sx={{ textAlign: 'center', p: 3, zIndex: 2 }}>
-          <VideocamOffIcon sx={{ fontSize: 48, color: '#94A3B8', mb: 1 }} />
-          <Typography variant='body1' sx={{ color: '#FFFFFF', fontWeight: 600 }}>
+          <VideocamOffIcon sx={{ fontSize: 48, color: theme.palette.text.secondary, mb: 1 }} />
+          <Typography variant='body1' sx={{ color: theme.palette.text.primary, fontWeight: 600 }}>
             {t('camera.paused')}
           </Typography>
           <Button
@@ -447,15 +460,15 @@ export const CameraView: React.FC<CameraViewProps> = ({
             justifyContent: 'center',
             textAlign: 'center',
             p: 3,
-            background: 'rgba(26, 29, 40, 0.95)',
-            zIndex: 5,
+            background: alpha(theme.palette.background.default, 0.95),
+            zIndex: theme.zIndex.modal,
           }}
         >
-          <WarningAmberIcon sx={{ fontSize: 44, color: '#FFB703', mb: 1 }} />
-          <Typography variant='h6' sx={{ color: '#FFFFFF', fontWeight: 700 }}>
+          <WarningAmberIcon sx={{ fontSize: 44, color: theme.palette.warning.main, mb: 1 }} />
+          <Typography variant='h6' sx={{ color: theme.palette.text.primary, fontWeight: 700 }}>
             {t('camera.accessNeeded')}
           </Typography>
-          <Typography variant='body2' sx={{ color: '#94A3B8', maxWidth: 360, mt: 0.5, mb: 2 }}>
+          <Typography variant='body2' sx={{ color: theme.palette.text.secondary, maxWidth: 360, mt: 0.5, mb: 2 }}>
             {t('camera.permissionDesc')}
           </Typography>
           <Button
@@ -482,17 +495,17 @@ export const CameraView: React.FC<CameraViewProps> = ({
           top: { xs: 10, sm: 20 },
           left: { xs: 10, sm: 20 },
           minWidth: { xs: 180, sm: 230 },
-          background: isMatch ? 'rgba(6, 214, 160, 0.18)' : 'rgba(26, 29, 40, 0.90)',
+          background: isMatch ? alpha(theme.palette.success.main, 0.18) : alpha(theme.palette.background.default, 0.90),
           backdropFilter: 'blur(16px)',
           px: { xs: 1.5, sm: 2.4 },
           py: { xs: 0.7, sm: 1.1 },
           borderRadius: 4,
-          border: `1.5px solid ${isMatch ? '#06D6A0' : 'rgba(255, 255, 255, 0.12)'}`,
+          border: `1.5px solid ${isMatch ? theme.palette.success.main : theme.palette.divider}`,
           display: 'flex',
           flexDirection: 'column',
           gap: 0.6,
-          zIndex: 3,
-          boxShadow: isMatch ? '0 0 24px rgba(6, 214, 160, 0.5)' : '0 8px 32px rgba(0,0,0,0.5)',
+          zIndex: theme.zIndex.appBar - 10,
+          boxShadow: isMatch ? `0 0 24px ${alpha(theme.palette.success.main, 0.5)}` : '0 8px 32px rgba(0,0,0,0.5)',
           transition: 'all 0.25s ease',
         }}
       >
@@ -503,11 +516,17 @@ export const CameraView: React.FC<CameraViewProps> = ({
                 width: 10,
                 height: 10,
                 borderRadius: '50%',
-                backgroundColor: isHandInView ? (isMatch ? '#06D6A0' : '#FFB703') : '#FF6B6B',
-                boxShadow: `0 0 8px ${isHandInView ? (isMatch ? '#06D6A0' : '#FFB703') : '#FF6B6B'}`,
+                backgroundColor: isHandInView
+                  ? (isMatch ? theme.palette.success.main : theme.palette.warning.main)
+                  : theme.palette.secondary.main,
+                boxShadow: `0 0 8px ${
+                  isHandInView
+                    ? (isMatch ? theme.palette.success.main : theme.palette.warning.main)
+                    : theme.palette.secondary.main
+                }`,
               }}
             />
-            <Typography variant='caption' sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: { xs: '0.8rem', sm: '0.95rem' } }}>
+            <Typography variant='caption' sx={{ color: theme.palette.text.primary, fontWeight: 800, fontSize: { xs: '0.8rem', sm: '0.95rem' } }}>
               {isCoolingDown
                 ? t('camera.next', { letter: targetLetter || '' })
                 : isHandInView
@@ -521,7 +540,7 @@ export const CameraView: React.FC<CameraViewProps> = ({
           </Box>
 
           {isMatch && (
-            <CheckCircleIcon sx={{ fontSize: { xs: 16, sm: 20 }, color: '#06D6A0' }} />
+            <CheckCircleIcon sx={{ fontSize: { xs: 16, sm: 20 }, color: theme.palette.success.main }} />
           )}
         </Box>
 
@@ -536,20 +555,20 @@ export const CameraView: React.FC<CameraViewProps> = ({
                 borderRadius: 4,
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 '& .MuiLinearProgress-bar': {
-                  backgroundColor: '#06D6A0',
-                  boxShadow: '0 0 12px #06D6A0',
+                  backgroundColor: theme.palette.success.main,
+                  boxShadow: `0 0 12px ${theme.palette.success.main}`,
                   borderRadius: 4,
                 },
               }}
             />
-            <Typography variant='caption' sx={{ color: '#A7F3D0', fontSize: '0.75rem', fontWeight: 700, display: 'block', textAlign: 'right', mt: 0.4 }}>
+            <Typography variant='caption' sx={{ color: theme.palette.success.light, fontSize: '0.75rem', fontWeight: 700, display: 'block', textAlign: 'right', mt: 0.4 }}>
               {t('camera.holdSteady', { progress: Math.round(holdProgress) })}
             </Typography>
           </Box>
         ) : (
           targetLetter && (
-            <Typography variant='caption' sx={{ color: '#94A3B8', fontSize: '0.8rem' }}>
-              {t('camera.target')} <strong style={{ color: '#FFB703' }}>{targetLetter}</strong>
+            <Typography variant='caption' sx={{ color: theme.palette.text.secondary, fontSize: '0.8rem' }}>
+              {t('camera.target')} <strong style={{ color: theme.palette.warning.main }}>{targetLetter}</strong>
             </Typography>
           )
         )}
@@ -563,26 +582,26 @@ export const CameraView: React.FC<CameraViewProps> = ({
           right: { xs: 10, sm: 20 },
           display: 'flex',
           gap: 1.2,
-          background: 'rgba(26, 29, 40, 0.90)',
+          background: alpha(theme.palette.background.default, 0.90),
           backdropFilter: 'blur(12px)',
           borderRadius: 4,
           p: { xs: 0.4, sm: 0.8 },
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-          zIndex: 2,
+          border: `1px solid ${theme.palette.divider}`,
+          zIndex: theme.zIndex.appBar - 10,
         }}
       >
         <Tooltip title={cameraActive ? t('camera.turnOff') : t('camera.turnOn')}>
-          <IconButton onClick={toggleCamera} size='small' sx={{ color: '#E2E8F0' }}>
+          <IconButton onClick={toggleCamera} size='small' sx={{ color: theme.palette.text.primary }}>
             {cameraActive ? <VideocamIcon fontSize='small' /> : <VideocamOffIcon fontSize='small' />}
           </IconButton>
         </Tooltip>
         <Tooltip title={t('camera.flipCamera')}>
-          <IconButton onClick={toggleFacingMode} size='small' sx={{ color: '#E2E8F0' }}>
+          <IconButton onClick={toggleFacingMode} size='small' sx={{ color: theme.palette.text.primary }}>
             <FlipCameraIosIcon fontSize='small' />
           </IconButton>
         </Tooltip>
         <Tooltip title={t('camera.reloadStream')}>
-          <IconButton onClick={() => initWebcam()} size='small' sx={{ color: '#E2E8F0' }}>
+          <IconButton onClick={() => initWebcam()} size='small' sx={{ color: theme.palette.text.primary }}>
             <RefreshIcon fontSize='small' />
           </IconButton>
         </Tooltip>

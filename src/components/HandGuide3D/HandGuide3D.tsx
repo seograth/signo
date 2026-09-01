@@ -18,6 +18,7 @@ import {
   Switch,
   FormControlLabel,
 } from '@mui/material'
+import { alpha, useTheme } from '@mui/material/styles'
 import RotateRightIcon from '@mui/icons-material/RotateRight'
 import PanToolIcon from '@mui/icons-material/PanTool'
 import TuneIcon from '@mui/icons-material/Tune'
@@ -31,6 +32,11 @@ import TouchAppIcon from '@mui/icons-material/TouchApp'
 import { useTranslation } from 'react-i18next'
 import gslTemplates from '../../assets/gsl_landmark_templates.json'
 import { GSL_ALPHABET, GslLetter, LETTER_TO_INDEX } from '../../services/gslDictionary'
+
+// Feature Flag: 3D Pose Editor is ONLY enabled when explicitly launched via 'npm run dev:editor' or VITE_ENABLE_POSE_EDITOR=true
+const IS_POSE_EDITOR_ENABLED =
+  import.meta.env.VITE_ENABLE_POSE_EDITOR === 'true' ||
+  import.meta.env.MODE === 'dev_editor'
 
 interface HandGuide3DProps {
   currentLetter: string
@@ -384,6 +390,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
   selectedHand,
   onHandToggle,
 }) => {
+  const theme = useTheme()
   const mountRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
   const isJointDraggingRef = useRef(false)
@@ -565,6 +572,10 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
     topRimLight.position.set(0, 7, -3)
     scene.add(topRimLight)
 
+    // Tracking arrays for strict WebGL VRAM GPU memory cleanup on unmount/letter change
+    const disposableGeometries: THREE.BufferGeometry[] = []
+    const disposableMaterials: THREE.Material[] = []
+
     // 4. Material
     const handMaterial = new THREE.MeshPhysicalMaterial({
       color: 0x00b4d8,
@@ -575,6 +586,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       reflectivity: 0.6,
       side: THREE.DoubleSide,
     })
+    disposableMaterials.push(handMaterial)
 
     const handGroup = new THREE.Group()
     handGroup.position.set(0, 0, 0)
@@ -623,6 +635,7 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
       geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3))
       geometry.setIndex(indices)
+      disposableGeometries.push(geometry)
 
       const mesh = new THREE.Mesh(geometry, handMaterial)
       mesh.castShadow = true
@@ -644,7 +657,9 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       else if ([1, 5, 9, 13, 17].includes(idx)) r = 0.16
       else if (idx === 0) r = 0.22
 
-      const capMesh = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 16), handMaterial)
+      const capGeo = new THREE.SphereGeometry(r, 16, 16)
+      disposableGeometries.push(capGeo)
+      const capMesh = new THREE.Mesh(capGeo, handMaterial)
       capMesh.castShadow = true
       handGroup.add(capMesh)
       jointCapMeshes.push({ mesh: capMesh, idx })
@@ -659,27 +674,28 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
         opacity: 0,
         depthTest: false,
       })
-      const indMesh = new THREE.Mesh(new THREE.SphereGeometry(0.065, 16, 16), indMat)
+      disposableMaterials.push(indMat)
+      const indGeo = new THREE.SphereGeometry(0.065, 16, 16)
+      disposableGeometries.push(indGeo)
+      const indMesh = new THREE.Mesh(indGeo, indMat)
       indMesh.renderOrder = 999
       handGroup.add(indMesh)
       jointIndicatorMeshes.push({ mesh: indMesh, idx })
     })
 
     // Palm Slabs
-    const palmPlateMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.42, 12, 12),
-      handMaterial
-    )
+    const palmGeo = new THREE.SphereGeometry(0.42, 12, 12)
+    disposableGeometries.push(palmGeo)
+    const palmPlateMesh = new THREE.Mesh(palmGeo, handMaterial)
     palmPlateMesh.scale.set(1.25, 1.1, 0.65)
     handGroup.add(palmPlateMesh)
 
     const metacarpalMeshes: THREE.Mesh[] = []
     const targetKnuckles = [5, 9, 13, 17]
     targetKnuckles.forEach(() => {
-      const strut = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.16, 0.18, 1, 16),
-        handMaterial
-      )
+      const strutGeo = new THREE.CylinderGeometry(0.16, 0.18, 1, 16)
+      disposableGeometries.push(strutGeo)
+      const strut = new THREE.Mesh(strutGeo, handMaterial)
       handGroup.add(strut)
       metacarpalMeshes.push(strut)
     })
@@ -687,18 +703,16 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
     const webbingMeshes: THREE.Mesh[] = []
     const webPairs = [[5, 9], [9, 13], [13, 17], [1, 5]]
     webPairs.forEach(() => {
-      const webMesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.12, 0.12, 1, 14),
-        handMaterial
-      )
+      const webGeo = new THREE.CylinderGeometry(0.12, 0.12, 1, 14)
+      disposableGeometries.push(webGeo)
+      const webMesh = new THREE.Mesh(webGeo, handMaterial)
       handGroup.add(webMesh)
       webbingMeshes.push(webMesh)
     })
 
-    const thumbBaseMesh = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.16, 0.22, 1, 16),
-      handMaterial
-    )
+    const thumbGeo = new THREE.CylinderGeometry(0.16, 0.22, 1, 16)
+    disposableGeometries.push(thumbGeo)
+    const thumbBaseMesh = new THREE.Mesh(thumbGeo, handMaterial)
     handGroup.add(thumbBaseMesh)
 
     const currentPositions: THREE.Vector3[] = []
@@ -1047,7 +1061,13 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
       window.removeEventListener('resize', handleResize)
+
+      disposableGeometries.forEach((g) => g.dispose())
+      disposableMaterials.forEach((m) => m.dispose())
       renderer.dispose()
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement)
+      }
     }
   }, [selectedHand])
 
@@ -1072,18 +1092,56 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'radial-gradient(circle at center, rgba(0, 180, 216, 0.18) 0%, #1A1D28 100%)',
+        background: `radial-gradient(circle at center, ${alpha(theme.palette.primary.main, 0.18)} 0%, ${theme.palette.background.default} 100%)`,
         overflow: 'hidden',
       }}
     >
-      {/* 3D Canvas Mount */}
+      {/* 3D Canvas Mount with WCAG AAA Keyboard Orbit Navigation & ARIA Accessibility */}
       <Box
         ref={mountRef}
+        tabIndex={0}
+        role='region'
+        aria-label={
+          isGreek
+            ? `Διαδραστικός 3D οδηγός νοηματικής για το γράμμα ${normLetter}. ${letterTip}`
+            : `Interactive 3D sign language guide for letter ${normLetter}. ${letterTip}`
+        }
+        onKeyDown={(e) => {
+          const ORBIT_STEP = 0.15
+          if (e.key === 'ArrowLeft') {
+            e.preventDefault()
+            rotationOffset.current.y -= ORBIT_STEP
+            setRotY(Number(rotationOffset.current.y.toFixed(2)))
+          }
+          if (e.key === 'ArrowRight') {
+            e.preventDefault()
+            rotationOffset.current.y += ORBIT_STEP
+            setRotY(Number(rotationOffset.current.y.toFixed(2)))
+          }
+          if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            rotationOffset.current.x = Math.max(-1.8, rotationOffset.current.x - ORBIT_STEP)
+            setRotX(Number(rotationOffset.current.x.toFixed(2)))
+          }
+          if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            rotationOffset.current.x = Math.min(1.8, rotationOffset.current.x + ORBIT_STEP)
+            setRotX(Number(rotationOffset.current.x.toFixed(2)))
+          }
+          if (e.key === 'r' || e.key === 'R') {
+            e.preventDefault()
+            resetRotation()
+          }
+        }}
         sx={{
           width: '100%',
           height: '100%',
           cursor: 'grab',
           '&:active': { cursor: 'grabbing' },
+          '&:focus-visible': {
+            outline: `3px solid ${theme.palette.primary.main}`,
+            outlineOffset: '-3px',
+          },
         }}
       />
 
@@ -1093,46 +1151,46 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           position: 'absolute',
           top: { xs: 10, sm: 20 },
           left: { xs: 10, sm: 20 },
-          background: 'rgba(26, 29, 40, 0.90)',
+          background: alpha(theme.palette.background.default, 0.90),
           backdropFilter: 'blur(16px)',
           px: { xs: 1.5, sm: 2.5 },
           py: { xs: 0.6, sm: 1.0 },
           borderRadius: 4,
-          border: '1px solid rgba(255, 255, 255, 0.12)',
+          border: `1px solid ${theme.palette.divider}`,
           display: 'flex',
           alignItems: 'center',
           gap: { xs: 0.8, sm: 1.4 },
           boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-          zIndex: 2,
+          zIndex: theme.zIndex.appBar - 10,
         }}
       >
-        <Typography variant='subtitle1' sx={{ color: '#00B4D8', fontWeight: 900, fontSize: { xs: '0.95rem', sm: '1.2rem' } }}>
+        <Typography variant='subtitle1' sx={{ color: theme.palette.primary.main, fontWeight: 900, fontSize: { xs: '0.95rem', sm: '1.2rem' } }}>
           {letterInfo.letter} ({letterDisplayName})
         </Typography>
-        <Typography variant='caption' sx={{ color: '#FFB703', fontWeight: 700, fontSize: { xs: '0.75rem', sm: '0.85rem' } }}>
+        <Typography variant='caption' sx={{ color: theme.palette.warning.main, fontWeight: 700, fontSize: { xs: '0.75rem', sm: '0.85rem' } }}>
           • {selectedHand === 'right' ? (isGreek ? 'Δεξί Χέρι 🤚' : 'Right Hand 🤚') : (isGreek ? 'Αριστερό Χέρι ✋' : 'Left Hand ✋')}
         </Typography>
       </Box>
 
       {/* Direct Dragging Visual Mode Banner (Top Center) */}
-      {isEditorOpen && (
+      {IS_POSE_EDITOR_ENABLED && isEditorOpen && (
         <Box
           sx={{
             position: 'absolute',
             top: 20,
             left: '50%',
             transform: 'translateX(-50%)',
-            background: 'rgba(0, 180, 216, 0.90)',
+            background: alpha(theme.palette.primary.main, 0.90),
             backdropFilter: 'blur(12px)',
-            color: '#FFFFFF',
+            color: theme.palette.text.primary,
             px: 2.5,
             py: 0.8,
             borderRadius: 20,
             display: 'flex',
             alignItems: 'center',
             gap: 1.2,
-            boxShadow: '0 8px 24px rgba(0, 180, 216, 0.4)',
-            zIndex: 3,
+            boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
+            zIndex: theme.zIndex.appBar - 5,
             pointerEvents: 'none',
           }}
         >
@@ -1151,32 +1209,34 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           right: { xs: 10, sm: 20 },
           display: 'flex',
           gap: 1.2,
-          background: 'rgba(26, 29, 40, 0.90)',
+          background: alpha(theme.palette.background.default, 0.90),
           backdropFilter: 'blur(12px)',
           borderRadius: 4,
           p: { xs: 0.4, sm: 0.8 },
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-          zIndex: 2,
+          border: `1px solid ${theme.palette.divider}`,
+          zIndex: theme.zIndex.appBar - 10,
         }}
       >
-        <Tooltip title={isEditorOpen ? 'Close 3D Pose Editor' : 'Open 3D Pose Editor 🛠️'}>
-          <IconButton
-            onClick={() => setIsEditorOpen(!isEditorOpen)}
-            size='small'
-            sx={{ color: isEditorOpen ? '#FFB703' : '#E2E8F0' }}
-          >
-            <TuneIcon fontSize='small' />
-          </IconButton>
-        </Tooltip>
+        {IS_POSE_EDITOR_ENABLED && (
+          <Tooltip title={isEditorOpen ? 'Close 3D Pose Editor' : 'Open 3D Pose Editor 🛠️'}>
+            <IconButton
+              onClick={() => setIsEditorOpen(!isEditorOpen)}
+              size='small'
+              sx={{ color: isEditorOpen ? theme.palette.warning.main : theme.palette.text.secondary }}
+            >
+              <TuneIcon fontSize='small' />
+            </IconButton>
+          </Tooltip>
+        )}
         {onHandToggle && (
           <Tooltip title={isGreek ? `Αλλαγή σε ${selectedHand === 'right' ? 'Αριστερό' : 'Δεξί'} Χέρι` : `Switch to ${selectedHand === 'right' ? 'Left' : 'Right'} Hand`}>
-            <IconButton onClick={onHandToggle} size='small' sx={{ color: '#E2E8F0' }}>
+            <IconButton onClick={onHandToggle} size='small' sx={{ color: theme.palette.text.secondary }}>
               <PanToolIcon fontSize='small' />
             </IconButton>
           </Tooltip>
         )}
         <Tooltip title={isGreek ? 'Επαναφορά Γωνίας Προβολής' : 'Reset 3D View Angle'}>
-          <IconButton onClick={resetRotation} size='small' sx={{ color: '#E2E8F0' }}>
+          <IconButton onClick={resetRotation} size='small' sx={{ color: theme.palette.text.secondary }}>
             <RotateRightIcon fontSize='small' />
           </IconButton>
         </Tooltip>
@@ -1189,13 +1249,13 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
           bottom: { xs: 10, sm: 20 },
           left: { xs: 10, sm: 20 },
           maxWidth: { xs: '65%', sm: '50%' },
-          background: 'rgba(26, 29, 40, 0.90)',
+          background: alpha(theme.palette.background.default, 0.90),
           backdropFilter: 'blur(12px)',
           px: { xs: 1.4, sm: 2.2 },
           py: { xs: 0.6, sm: 1.0 },
           borderRadius: 3.5,
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-          zIndex: 2,
+          border: `1px solid ${theme.palette.divider}`,
+          zIndex: theme.zIndex.appBar - 10,
         }}
       >
         <Typography variant='caption' sx={{ color: '#E2E8F0', fontSize: { xs: '0.78rem', sm: '0.9rem' }, fontWeight: 600, display: 'block' }}>
@@ -1204,214 +1264,216 @@ export const HandGuide3D: React.FC<HandGuide3DProps> = ({
       </Box>
 
       {/* 3D Pose Editor Drawer */}
-      <Drawer
-        anchor='right'
-        open={isEditorOpen}
-        onClose={() => setIsEditorOpen(false)}
-        PaperProps={{
-          sx: {
-            width: { xs: '100%', sm: 400 },
-            background: 'rgba(15, 23, 42, 0.96)',
-            backdropFilter: 'blur(20px)',
-            color: '#F8FAFC',
-            p: 2.5,
-            borderLeft: '1px solid rgba(255, 255, 255, 0.12)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            overflowY: 'auto',
-          },
-        }}
-      >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <TuneIcon sx={{ color: '#00B4D8' }} />
-            <Typography variant='h6' sx={{ fontWeight: 800, color: '#00B4D8' }}>
-              3D Gesture Designer ({normLetter})
-            </Typography>
+      {IS_POSE_EDITOR_ENABLED && (
+        <Drawer
+          anchor='right'
+          open={isEditorOpen}
+          onClose={() => setIsEditorOpen(false)}
+          PaperProps={{
+            sx: {
+              width: { xs: '100%', sm: 400 },
+              background: 'rgba(15, 23, 42, 0.96)',
+              backdropFilter: 'blur(20px)',
+              color: '#F8FAFC',
+              p: 2.5,
+              borderLeft: '1px solid rgba(255, 255, 255, 0.12)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              overflowY: 'auto',
+            },
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <TuneIcon sx={{ color: '#00B4D8' }} />
+              <Typography variant='h6' sx={{ fontWeight: 800, color: '#00B4D8' }}>
+                3D Gesture Designer ({normLetter})
+              </Typography>
+            </Box>
+            <IconButton onClick={() => setIsEditorOpen(false)} size='small' sx={{ color: '#94A3B8' }}>
+              <CloseIcon />
+            </IconButton>
           </Box>
-          <IconButton onClick={() => setIsEditorOpen(false)} size='small' sx={{ color: '#94A3B8' }}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
 
-        {/* 1. Joint Picker & Coordinate Sliders */}
-        <Box sx={{ background: 'rgba(255,255,255,0.03)', p: 1.5, borderRadius: 3, border: '1px solid rgba(255,255,255,0.08)' }}>
-          <Typography variant='subtitle2' sx={{ color: '#00B4D8', fontWeight: 800, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <TouchAppIcon fontSize='small' /> Joint Position (3D Drag & Sliders)
-          </Typography>
+          {/* 1. Joint Picker & Coordinate Sliders */}
+          <Box sx={{ background: 'rgba(255,255,255,0.03)', p: 1.5, borderRadius: 3, border: '1px solid rgba(255,255,255,0.08)' }}>
+            <Typography variant='subtitle2' sx={{ color: '#00B4D8', fontWeight: 800, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <TouchAppIcon fontSize='small' /> Joint Position (3D Drag & Sliders)
+            </Typography>
 
-          <FormControl fullWidth size='small' sx={{ mb: 1.5 }}>
-            <InputLabel sx={{ color: '#94A3B8' }}>Selected Landmark Joint</InputLabel>
-            <Select
-              value={selectedJoint}
-              label='Selected Landmark Joint'
-              onChange={(e) => setSelectedJoint(Number(e.target.value))}
+            <FormControl fullWidth size='small' sx={{ mb: 1.5 }}>
+              <InputLabel sx={{ color: '#94A3B8' }}>Selected Landmark Joint</InputLabel>
+              <Select
+                value={selectedJoint}
+                label='Selected Landmark Joint'
+                onChange={(e) => setSelectedJoint(Number(e.target.value))}
+                sx={{
+                  color: '#F8FAFC',
+                  '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#00B4D8' },
+                }}
+              >
+                {Object.entries(LANDMARK_NAMES).map(([idx, name]) => (
+                  <MenuItem key={idx} value={Number(idx)}>
+                    Joint {idx}: {name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Chip
+              label={`Editing Joint ${selectedJoint}: ${LANDMARK_NAMES[selectedJoint] || ''}`}
+              sx={{ background: 'rgba(0, 180, 216, 0.15)', color: '#00B4D8', fontWeight: 700, width: '100%', mb: 1.5 }}
+            />
+
+            <Box sx={{ px: 1 }}>
+              <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+                X Coordinate: {activeJointCoords[0].toFixed(3)}
+              </Typography>
+              <Slider
+                min={-1.5}
+                max={1.5}
+                step={0.01}
+                value={activeJointCoords[0]}
+                onChange={(_, val) => handleJointChange(0, val as number)}
+                sx={{ color: '#00B4D8' }}
+              />
+            </Box>
+
+            <Box sx={{ px: 1 }}>
+              <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+                Y Coordinate: {activeJointCoords[1].toFixed(3)}
+              </Typography>
+              <Slider
+                min={-1.5}
+                max={1.5}
+                step={0.01}
+                value={activeJointCoords[1]}
+                onChange={(_, val) => handleJointChange(1, val as number)}
+                sx={{ color: '#10B981' }}
+              />
+            </Box>
+
+            <Box sx={{ px: 1 }}>
+              <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+                Z Coordinate: {activeJointCoords[2].toFixed(3)}
+              </Typography>
+              <Slider
+                min={-1.5}
+                max={1.5}
+                step={0.01}
+                value={activeJointCoords[2]}
+                onChange={(_, val) => handleJointChange(2, val as number)}
+                sx={{ color: '#FBBF24' }}
+              />
+            </Box>
+          </Box>
+
+          {/* 2. Orientation & Mirror Controls */}
+          <Box sx={{ background: 'rgba(255,255,255,0.03)', p: 1.5, borderRadius: 3, border: '1px solid rgba(255,255,255,0.08)' }}>
+            <Typography variant='subtitle2' sx={{ color: '#FFB703', fontWeight: 800, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <ThreeDRotationIcon fontSize='small' /> Starting Orientation & Flip
+            </Typography>
+
+            <Box sx={{ px: 1, mb: 1 }}>
+              <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+                X Rotation (Pitch): {(rotX * (180 / Math.PI)).toFixed(0)}°
+              </Typography>
+              <Slider
+                min={-Math.PI}
+                max={Math.PI}
+                step={0.02}
+                value={rotX}
+                onChange={(_, val) => setRotX(val as number)}
+                sx={{ color: '#FFB703' }}
+              />
+            </Box>
+
+            <Box sx={{ px: 1, mb: 1 }}>
+              <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+                Y Rotation (Yaw): {(rotY * (180 / Math.PI)).toFixed(0)}°
+              </Typography>
+              <Slider
+                min={-Math.PI * 1.5}
+                max={Math.PI * 1.5}
+                step={0.02}
+                value={rotY}
+                onChange={(_, val) => setRotY(val as number)}
+                sx={{ color: '#FFB703' }}
+              />
+            </Box>
+
+            <Box sx={{ px: 1, mb: 1 }}>
+              <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
+                Z Rotation (Roll): {(rotZ * (180 / Math.PI)).toFixed(0)}°
+              </Typography>
+              <Slider
+                min={-Math.PI}
+                max={Math.PI}
+                step={0.02}
+                value={rotZ}
+                onChange={(_, val) => setRotZ(val as number)}
+                sx={{ color: '#FFB703' }}
+              />
+            </Box>
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isMirrored}
+                  onChange={(e) => setIsMirrored(e.target.checked)}
+                  color='primary'
+                />
+              }
+              label={
+                <Typography variant='body2' sx={{ fontWeight: 700, color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                  <SwapHorizIcon fontSize='small' /> Flip Hand Horizontal (Mirror)
+                </Typography>
+              }
+              sx={{ mt: 0.5, ml: 0.2 }}
+            />
+          </Box>
+
+          {/* Action Buttons */}
+          <Box sx={{ mt: 'auto', display: 'flex', flexDirection: 'column', gap: 1.2 }}>
+            <Button
+              variant='contained'
+              startIcon={<SaveIcon />}
+              onClick={handleSaveLocal}
               sx={{
-                color: '#F8FAFC',
-                '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' },
-                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#00B4D8' },
+                backgroundColor: '#10B981',
+                fontWeight: 800,
+                py: 1.2,
+                '&:hover': { backgroundColor: '#059669' },
               }}
             >
-              {Object.entries(LANDMARK_NAMES).map(([idx, name]) => (
-                <MenuItem key={idx} value={Number(idx)}>
-                  Joint {idx}: {name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Chip
-            label={`Editing Joint ${selectedJoint}: ${LANDMARK_NAMES[selectedJoint] || ''}`}
-            sx={{ background: 'rgba(0, 180, 216, 0.15)', color: '#00B4D8', fontWeight: 700, width: '100%', mb: 1.5 }}
-          />
-
-          <Box sx={{ px: 1 }}>
-            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
-              X Coordinate: {activeJointCoords[0].toFixed(3)}
-            </Typography>
-            <Slider
-              min={-1.5}
-              max={1.5}
-              step={0.01}
-              value={activeJointCoords[0]}
-              onChange={(_, val) => handleJointChange(0, val as number)}
-              sx={{ color: '#00B4D8' }}
-            />
+              Save Complete Gesture to App
+            </Button>
+            <Button
+              variant='outlined'
+              startIcon={<ContentCopyIcon />}
+              onClick={handleCopyCode}
+              sx={{
+                borderColor: '#00B4D8',
+                color: '#00B4D8',
+                fontWeight: 700,
+                '&:hover': { borderColor: '#38BDF8', backgroundColor: 'rgba(0,180,216,0.1)' },
+              }}
+            >
+              Copy Full Gesture Code Snippet
+            </Button>
+            <Button
+              variant='text'
+              startIcon={<RestartAltIcon />}
+              onClick={handleResetPose}
+              sx={{ color: '#EF4444', fontWeight: 700 }}
+            >
+              Reset Gesture to Default
+            </Button>
           </Box>
-
-          <Box sx={{ px: 1 }}>
-            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
-              Y Coordinate: {activeJointCoords[1].toFixed(3)}
-            </Typography>
-            <Slider
-              min={-1.5}
-              max={1.5}
-              step={0.01}
-              value={activeJointCoords[1]}
-              onChange={(_, val) => handleJointChange(1, val as number)}
-              sx={{ color: '#10B981' }}
-            />
-          </Box>
-
-          <Box sx={{ px: 1 }}>
-            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
-              Z Coordinate: {activeJointCoords[2].toFixed(3)}
-            </Typography>
-            <Slider
-              min={-1.5}
-              max={1.5}
-              step={0.01}
-              value={activeJointCoords[2]}
-              onChange={(_, val) => handleJointChange(2, val as number)}
-              sx={{ color: '#FBBF24' }}
-            />
-          </Box>
-        </Box>
-
-        {/* 2. Orientation & Mirror Controls */}
-        <Box sx={{ background: 'rgba(255,255,255,0.03)', p: 1.5, borderRadius: 3, border: '1px solid rgba(255,255,255,0.08)' }}>
-          <Typography variant='subtitle2' sx={{ color: '#FFB703', fontWeight: 800, mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ThreeDRotationIcon fontSize='small' /> Starting Orientation & Flip
-          </Typography>
-
-          <Box sx={{ px: 1, mb: 1 }}>
-            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
-              X Rotation (Pitch): {(rotX * (180 / Math.PI)).toFixed(0)}°
-            </Typography>
-            <Slider
-              min={-Math.PI}
-              max={Math.PI}
-              step={0.02}
-              value={rotX}
-              onChange={(_, val) => setRotX(val as number)}
-              sx={{ color: '#FFB703' }}
-            />
-          </Box>
-
-          <Box sx={{ px: 1, mb: 1 }}>
-            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
-              Y Rotation (Yaw): {(rotY * (180 / Math.PI)).toFixed(0)}°
-            </Typography>
-            <Slider
-              min={-Math.PI * 1.5}
-              max={Math.PI * 1.5}
-              step={0.02}
-              value={rotY}
-              onChange={(_, val) => setRotY(val as number)}
-              sx={{ color: '#FFB703' }}
-            />
-          </Box>
-
-          <Box sx={{ px: 1, mb: 1 }}>
-            <Typography variant='caption' sx={{ color: '#94A3B8', fontWeight: 700 }}>
-              Z Rotation (Roll): {(rotZ * (180 / Math.PI)).toFixed(0)}°
-            </Typography>
-            <Slider
-              min={-Math.PI}
-              max={Math.PI}
-              step={0.02}
-              value={rotZ}
-              onChange={(_, val) => setRotZ(val as number)}
-              sx={{ color: '#FFB703' }}
-            />
-          </Box>
-
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isMirrored}
-                onChange={(e) => setIsMirrored(e.target.checked)}
-                color='primary'
-              />
-            }
-            label={
-              <Typography variant='body2' sx={{ fontWeight: 700, color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                <SwapHorizIcon fontSize='small' /> Flip Hand Horizontal (Mirror)
-              </Typography>
-            }
-            sx={{ mt: 0.5, ml: 0.2 }}
-          />
-        </Box>
-
-        {/* Action Buttons */}
-        <Box sx={{ mt: 'auto', display: 'flex', flexDirection: 'column', gap: 1.2 }}>
-          <Button
-            variant='contained'
-            startIcon={<SaveIcon />}
-            onClick={handleSaveLocal}
-            sx={{
-              backgroundColor: '#10B981',
-              fontWeight: 800,
-              py: 1.2,
-              '&:hover': { backgroundColor: '#059669' },
-            }}
-          >
-            Save Complete Gesture to App
-          </Button>
-          <Button
-            variant='outlined'
-            startIcon={<ContentCopyIcon />}
-            onClick={handleCopyCode}
-            sx={{
-              borderColor: '#00B4D8',
-              color: '#00B4D8',
-              fontWeight: 700,
-              '&:hover': { borderColor: '#38BDF8', backgroundColor: 'rgba(0,180,216,0.1)' },
-            }}
-          >
-            Copy Full Gesture Code Snippet
-          </Button>
-          <Button
-            variant='text'
-            startIcon={<RestartAltIcon />}
-            onClick={handleResetPose}
-            sx={{ color: '#EF4444', fontWeight: 700 }}
-          >
-            Reset Gesture to Default
-          </Button>
-        </Box>
-      </Drawer>
+        </Drawer>
+      )}
 
       {/* Toast Notification */}
       <Snackbar

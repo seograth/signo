@@ -116,9 +116,11 @@ export const Learn: React.FC = () => {
     setStreak(nextStreak)
     if (nextStreak > bestStreak) setBestStreak(nextStreak)
 
-    const pointsGained = 100 * Math.min(nextStreak, 5)
-    setScore((prev) => prev + pointsGained)
-    setLettersCompletedCount((prev) => prev + 1)
+    if (mode === 'speed') {
+      const pointsGained = 100 * Math.min(nextStreak, 5)
+      setScore((prev) => prev + pointsGained)
+      setLettersCompletedCount((prev) => prev + 1)
+    }
 
     if (mode === 'words') {
       if (letterInWordIndex + 1 < currentWord.word.length) {
