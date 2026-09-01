@@ -60,7 +60,7 @@ def live_prediction(model_path, label_encoder_path=None):
 
                 mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-        cv2.imshow("SigniFi - Greek Sign Language Live Inference", frame)
+        cv2.imshow("signo - Greek Sign Language Live Inference", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

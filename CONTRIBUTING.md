@@ -28,8 +28,8 @@ Please sign off all commits using `git commit -s -m "feat: description of change
 
 1. **Fork and Clone the Repository:**
    ```bash
-   git clone https://github.com/your-username/signifi.git
-   cd signifi
+   git clone https://github.com/your-username/signo.git
+   cd signo
    ```
 
 2. **Install Dependencies:**

@@ -23,7 +23,7 @@ Signo utilizes **Vercel Web Analytics** for aggregate, cookieless, privacy-prese
 ## 3. Local Browser Storage
 Signo uses browser `localStorage` solely for non-sensitive local user preferences:
 - Selected UI Language (`i18nextLng`)
-- Mute/Audio state (`signifi_muted`)
+- Mute/Audio state (`signo_muted`)
 - Custom gesture calibration profiles (`gsl_pose_<LETTER>`)
 
 Users may wipe this data at any time by clearing browser site storage.

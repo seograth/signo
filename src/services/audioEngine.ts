@@ -1,11 +1,11 @@
-// Web Audio API Sound Synthesizer for SigniFi
+// Web Audio API Sound Synthesizer for signo
 
 class AudioEngine {
   private ctx: AudioContext | null = null
   private isMuted: boolean = false
 
   constructor() {
-    this.isMuted = localStorage.getItem('signifi_muted') === 'true'
+    this.isMuted = localStorage.getItem('signo_muted') === 'true'
   }
 
   /**
@@ -38,7 +38,7 @@ class AudioEngine {
 
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted
-    localStorage.setItem('signifi_muted', String(this.isMuted))
+    localStorage.setItem('signo_muted', String(this.isMuted))
     return this.isMuted
   }
 

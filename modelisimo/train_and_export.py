@@ -13,7 +13,7 @@ from src.data.preprocess import normalize_hand_landmarks, augment_data
 from src.model.export_model import GREEK_ALPHABET
 
 def main():
-    print("=== Training SigniFi GSL Model with Standardized Wrist Normalization ===")
+    print("=== Training signo GSL Model with Standardized Wrist Normalization ===")
     dataset_path = "./modelisimo/data/processed/gsl_dataset.csv"
     model_save_path = "./modelisimo/models/gsl_hand_model.h5"
     best_model_root = "./best_model.h5"
