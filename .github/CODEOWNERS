@@ -1,0 +1,21 @@
+# CODEOWNERS for Signo 🤟
+# https://help.github.com/articles/about-code-owners/
+
+# Global default owners for all repository files
+* @seograth
+
+# Machine Learning & Computer Vision Services
+/src/services/ @seograth
+/src/hooks/ @seograth
+
+# Model and training
+/modelisimo/ @seograth
+
+# 3D Avatar & Camera Viewport Components
+/src/components/HandGuide3D/ @seograth
+/src/components/CameraView/ @seograth
+
+# Security & Compliance Governance
+/SECURITY.md @seograth
+/PRIVACY.md @seograth
+/LICENSE @seograth

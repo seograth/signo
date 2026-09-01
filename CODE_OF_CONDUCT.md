@@ -39,4 +39,4 @@ This Code of Conduct applies within all project spaces (GitHub issues, discussio
 
 ## Reporting
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at `conduct@signo.dev`. All complaints will be reviewed and investigated promptly and confidentially.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at `stserentzoulias@outlook.com`. All complaints will be reviewed and investigated promptly and confidentially.

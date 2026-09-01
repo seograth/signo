@@ -16,7 +16,7 @@ We take the security and privacy of Signo seriously. If you discover a security 
 
 Please report vulnerabilities privately:
 
-1. **Email:** Send details to `security@signo.dev` (or submit a Private Security Advisory via GitHub's "Security" tab).
+1. **Email:** Send details to `stserentzoulias@outlook.com` (or submit a Private Security Advisory via GitHub's "Security" tab).
 2. **Details to Include:**
    - Description of the vulnerability or flaw.
    - Step-by-step instructions or proof-of-concept script.
