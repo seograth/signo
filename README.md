@@ -10,6 +10,8 @@
 
 ## 📋 Overview
 
+<video src="docs/assets/signo-demo.mp4" controls width="100%" autoplay muted loop></video>
+
 **Signo** is an open-source, interactive sign language learning platform—often described as "Duolingo for Sign Language". Specifically engineered for **Greek Sign Language (Ελληνική Νοηματική Γλώσσα - ΕΝΓ)**, Signo transforms static fingerspelling charts into immersive, real-time feedback loops.
 
 By pairing **MediaPipe 3D Hand Tracking** and **TensorFlow.js** neural classification with a **Three.js procedural 3D hand guide**, Signo evaluates user hand gestures directly in the browser—with **zero server latency** and **100% video privacy**.
